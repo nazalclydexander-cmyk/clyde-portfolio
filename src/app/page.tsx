@@ -188,5 +188,5 @@ function FeaturedProject({ project, index }: { project: Project; index: number }
 }
 
 function ProjectCard({ project, index }: { project: Project; index: number }) {
-  return <article className="project-card"><span className="project-index">PROJECT / {String(index + 1).padStart(2, "0")}</span><h3>{project.title}</h3><p>{project.description || "Project details coming soon."}</p><TechList technologies={project.technologies} /><ProjectLinks project={project} /></article>;
+  return <article className="project-card"><div className="project-card-copy"><span className="project-index">PROJECT / {String(index + 1).padStart(2, "0")}</span><h3>{project.title}</h3><p>{project.description || "Project details coming soon."}</p><TechList technologies={project.technologies} /><ProjectLinks project={project} /></div><ProjectMedia project={project} /></article>;
 }
