@@ -10,15 +10,16 @@ const links = [
   { href: "#contact", label: "Contact" },
 ];
 
-export default function PublicNavbar({ githubUrl }: { githubUrl?: string }) {
+export default function PublicNavbar({ displayName, githubUrl }: { displayName: string; githubUrl?: string }) {
   const [open, setOpen] = useState(false);
+  const brandInitial = displayName.trim().charAt(0).toUpperCase() || "C";
 
   return (
     <header className="site-header">
       <div className="site-container nav-inner">
-        <a href="#top" className="brand-mark" aria-label="Clyde, back to top">
-          <span className="brand-symbol">C</span>
-          <span>Clyde</span>
+        <a href="#top" className="brand-mark" aria-label={`${displayName} home`}>
+          <span className="brand-symbol">{brandInitial}</span>
+          <span>{displayName}</span>
         </a>
 
         <nav className="desktop-nav" aria-label="Primary navigation">

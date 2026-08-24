@@ -68,7 +68,7 @@ export default async function Home() {
 
   return (
     <main id="top">
-      <PublicNavbar githubUrl={githubUrl} />
+      <PublicNavbar displayName={heroName} githubUrl={githubUrl} />
 
       <section className="hero" aria-labelledby="hero-title">
         <div className={`site-container hero-inner ${hasPortrait ? "hero-has-portrait" : "hero-no-portrait"}`}>
