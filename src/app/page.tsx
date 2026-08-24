@@ -44,10 +44,8 @@ export default async function Home() {
   const portfolioProjects = (projects || []) as Project[];
   const portfolioSkills = (skills || []) as Skill[];
   const portfolioProfile = (profile || null) as PortfolioProfilePublic | null;
-  const featured = portfolioProjects.filter((project) => project.featured);
-  const featuredProjects = featured.length ? featured : portfolioProjects.slice(0, 2);
-  const featuredIds = new Set(featuredProjects.map((project) => project.id));
-  const additionalProjects = portfolioProjects.filter((project) => !featuredIds.has(project.id));
+  const featuredProject = portfolioProjects.find((project) => project.featured) || portfolioProjects[0] || null;
+  const additionalProjects = featuredProject ? portfolioProjects.filter((project) => project.id !== featuredProject.id) : [];
   const githubUrl = portfolioProfile?.github_url || portfolioProjects.find((project) => project.github_url)?.github_url || undefined;
   const heroName = portfolioProfile?.display_name?.trim() || "Clyde";
   const heroAvailability = portfolioProfile?.availability_text?.trim() || "Open to opportunities";
@@ -133,12 +131,12 @@ export default async function Home() {
       <section id="projects" className="section">
         <div className="site-container">
           <div className="section-heading"><p className="eyebrow">03 / Selected work</p><h2>Projects built to be useful.</h2><p>A selection of systems and applications, from the underlying technical decisions to the finished interface.</p></div>
-          {featuredProjects.length ? (
+          {featuredProject ? (
             <div className="projects-stack">
-              {featuredProjects.map((project, index) => <FeaturedProject key={project.id} project={project} index={index} />)}
+              <FeaturedProject project={featuredProject} index={0} />
             </div>
           ) : <div className="empty-state">No projects available yet.</div>}
-          {additionalProjects.length > 0 && <div className="additional-projects">{additionalProjects.map((project, index) => <ProjectCard key={project.id} project={project} index={index + featuredProjects.length} />)}</div>}
+          {additionalProjects.length > 0 && <div className="additional-projects">{additionalProjects.map((project, index) => <ProjectCard key={project.id} project={project} index={index + 1} />)}</div>}
         </div>
       </section>
 
@@ -169,8 +167,8 @@ function buildFooterSubtitle(profile: PortfolioProfilePublic | null) {
   return parts.length ? parts.join(" · ") : "Technical Support · Cloud · Developer";
 }
 
-function ProjectMedia({ project }: { project: Project }) {
-  return <div className="project-visual">{project.image_url ? <img src={project.image_url} alt={`${project.title} project screenshot`} /> : <div className="project-placeholder">Project preview</div>}</div>;
+function ProjectMedia({ project, featured = false }: { project: Project; featured?: boolean }) {
+  return <div className={`project-visual${featured ? " project-visual-featured" : ""}`}>{project.image_url ? <img src={project.image_url} alt={`${project.title} project screenshot`} /> : <div className="project-placeholder">Project preview</div>}</div>;
 }
 
 function ProjectLinks({ project }: { project: Project }) {
@@ -184,7 +182,7 @@ function TechList({ technologies }: { technologies: string[] | null }) {
 }
 
 function FeaturedProject({ project, index }: { project: Project; index: number }) {
-  return <article className="featured-project"><ProjectMedia project={project} /><div className="project-content"><span className="project-index">PROJECT / {String(index + 1).padStart(2, "0")}</span><h3>{project.title}</h3><p>{project.long_description || project.description || "Project details coming soon."}</p><TechList technologies={project.technologies} /><ProjectLinks project={project} /></div></article>;
+  return <article className="featured-project"><ProjectMedia project={project} featured /><div className="project-content"><span className="project-index">PROJECT / {String(index + 1).padStart(2, "0")}</span><h3>{project.title}</h3><p>{project.description || "Project details coming soon."}</p><TechList technologies={project.technologies} /><ProjectLinks project={project} /></div></article>;
 }
 
 function ProjectCard({ project, index }: { project: Project; index: number }) {
