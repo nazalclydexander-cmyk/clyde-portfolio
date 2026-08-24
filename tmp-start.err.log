@@ -1,0 +1,6 @@
+Profile error: {
+  code: 'PGRST205',
+  details: null,
+  hint: null,
+  message: "Could not find the table 'public.portfolio_profile' in the schema cache"
+}
