@@ -1,38 +1,133 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import Script from "next/script";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { ArrowUpRightIcon } from "@/components/Icons";
 
 export default function ContactForm() {
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
+  const widgetContainerRef = useRef<HTMLDivElement | null>(null);
+  const widgetIdRef = useRef<string | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
+  const [website, setWebsite] = useState("");
   const [loading, setLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileReady, setTurnstileReady] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    if (!turnstileReady || !turnstileSiteKey || !widgetContainerRef.current || widgetIdRef.current || !window.turnstile) {
+      return;
+    }
+
+    widgetIdRef.current = window.turnstile.render(widgetContainerRef.current, {
+      sitekey: turnstileSiteKey,
+      callback: (token: string) => {
+        setTurnstileToken(token);
+        setError("");
+      },
+      "error-callback": () => {
+        setTurnstileToken("");
+        setError("Unable to verify your submission right now. Please try again.");
+      },
+      "expired-callback": () => {
+        setTurnstileToken("");
+      },
+    });
+  }, [turnstileReady, turnstileSiteKey]);
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setLoading(true); setSuccess(""); setError("");
-    const { error: submissionError } = await supabase.from("messages").insert({ name: name.trim(), email: email.trim(), subject: subject.trim() || null, message: message.trim() });
-    if (submissionError) { setError("Unable to send your message. Please try again."); console.error(submissionError); setLoading(false); return; }
-    setSuccess("Thanks — your message has been sent successfully.");
-    setName(""); setEmail(""); setSubject(""); setMessage(""); setLoading(false);
+
+    if (!turnstileSiteKey) {
+      setError("This contact form is not available right now. Please try again later.");
+      return;
+    }
+
+    if (!turnstileToken) {
+      setError("Please complete the verification before sending your message.");
+      return;
+    }
+
+    setLoading(true);
+    setSuccess("");
+    setError("");
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          subject,
+          message,
+          website,
+          turnstileToken,
+        }),
+      });
+
+      const result = (await response.json().catch(() => null)) as { error?: string } | null;
+
+      if (!response.ok) {
+        setError(result?.error || "Unable to send your message. Please try again.");
+
+        if (response.status === 403 && widgetIdRef.current && window.turnstile) {
+          window.turnstile.reset(widgetIdRef.current);
+          setTurnstileToken("");
+        }
+
+        return;
+      }
+
+      setSuccess("Thanks - your message has been sent successfully.");
+      setName("");
+      setEmail("");
+      setSubject("");
+      setMessage("");
+      setWebsite("");
+      setTurnstileToken("");
+
+      if (widgetIdRef.current && window.turnstile) {
+        window.turnstile.reset(widgetIdRef.current);
+      }
+    } catch {
+      setError("Unable to send your message. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} className="contact-form">
+      <Script
+        src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
+        strategy="afterInteractive"
+        onReady={() => setTurnstileReady(true)}
+      />
       <div className="form-row">
-        <div className="field"><label htmlFor="contact-name">Name</label><input id="contact-name" type="text" required autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} placeholder="Your name" /></div>
-        <div className="field"><label htmlFor="contact-email">Email</label><input id="contact-email" type="email" required autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" /></div>
+        <div className="field"><label htmlFor="contact-name">Name</label><input id="contact-name" type="text" required autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} placeholder="Your name" maxLength={100} /></div>
+        <div className="field"><label htmlFor="contact-email">Email</label><input id="contact-email" type="email" required autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" maxLength={254} /></div>
       </div>
-      <div className="field"><label htmlFor="contact-subject">Subject <span className="muted">(optional)</span></label><input id="contact-subject" type="text" value={subject} onChange={(event) => setSubject(event.target.value)} placeholder="What would you like to discuss?" /></div>
-      <div className="field"><label htmlFor="contact-message">Message</label><textarea id="contact-message" required value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Share a few details about the role, project, or problem..." /></div>
+      <div className="field"><label htmlFor="contact-subject">Subject <span className="muted">(optional)</span></label><input id="contact-subject" type="text" value={subject} onChange={(event) => setSubject(event.target.value)} placeholder="What would you like to discuss?" maxLength={150} /></div>
+      <div className="field"><label htmlFor="contact-message">Message</label><textarea id="contact-message" required value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Share a few details about the role, project, or problem..." minLength={10} maxLength={5000} /></div>
+      <div className="hp-field" aria-hidden="true">
+        <label htmlFor="contact-website">Website</label>
+        <input id="contact-website" type="text" tabIndex={-1} autoComplete="off" value={website} onChange={(event) => setWebsite(event.target.value)} />
+      </div>
+      <div className="field">
+        <div ref={widgetContainerRef} className="turnstile-widget" />
+        {!turnstileSiteKey && <p className="field-hint">Turnstile is not configured for this environment.</p>}
+      </div>
       {error && <div className="form-message form-error" role="alert">{error}</div>}
       {success && <div className="form-message form-success" role="status">{success}</div>}
-      <div><button type="submit" disabled={loading} className="button">{loading ? "Sending…" : "Send message"}{!loading && <ArrowUpRightIcon className="icon-sm" />}</button></div>
+      <div><button type="submit" disabled={loading || !turnstileSiteKey} className="button">{loading ? "Sending..." : "Send message"}{!loading && <ArrowUpRightIcon className="icon-sm" />}</button></div>
     </form>
   );
 }
