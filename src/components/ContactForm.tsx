@@ -86,7 +86,7 @@ export default function ContactForm() {
         return;
       }
 
-      setSuccess("Thanks - your message has been sent successfully.");
+      setSuccess("Thanks. Your message has been sent successfully.");
       setName("");
       setEmail("");
       setSubject("");
@@ -112,22 +112,22 @@ export default function ContactForm() {
         onReady={() => setTurnstileReady(true)}
       />
       <div className="form-row">
-        <div className="field"><label htmlFor="contact-name">Name</label><input id="contact-name" type="text" required autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} placeholder="Your name" maxLength={100} /></div>
-        <div className="field"><label htmlFor="contact-email">Email</label><input id="contact-email" type="email" required autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" maxLength={254} /></div>
+        <div className="field"><label htmlFor="contact-name">Name</label><input id="contact-name" name="name" type="text" required autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} placeholder="Example: Clyde Nazal…" maxLength={100} /></div>
+        <div className="field"><label htmlFor="contact-email">Email</label><input id="contact-email" name="email" type="email" required autoComplete="email" spellCheck={false} value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Example: clyde@example.com…" maxLength={254} /></div>
       </div>
-      <div className="field"><label htmlFor="contact-subject">Subject <span className="muted">(optional)</span></label><input id="contact-subject" type="text" value={subject} onChange={(event) => setSubject(event.target.value)} placeholder="What would you like to discuss?" maxLength={150} /></div>
-      <div className="field"><label htmlFor="contact-message">Message</label><textarea id="contact-message" required value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Share a few details about the role, project, or problem..." minLength={10} maxLength={5000} /></div>
+      <div className="field"><label htmlFor="contact-subject">Subject <span className="muted">(optional)</span></label><input id="contact-subject" name="subject" type="text" autoComplete="off" value={subject} onChange={(event) => setSubject(event.target.value)} placeholder="Example: Cloud support role…" maxLength={150} /></div>
+      <div className="field"><label htmlFor="contact-message">Message</label><textarea id="contact-message" name="message" required autoComplete="off" value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Example: I need help stabilizing a support workflow…" minLength={10} maxLength={5000} /></div>
       <div className="hp-field" aria-hidden="true">
         <label htmlFor="contact-website">Website</label>
-        <input id="contact-website" type="text" tabIndex={-1} autoComplete="off" value={website} onChange={(event) => setWebsite(event.target.value)} />
+        <input id="contact-website" name="website" type="text" tabIndex={-1} autoComplete="off" value={website} onChange={(event) => setWebsite(event.target.value)} />
       </div>
       <div className="field">
         <div ref={widgetContainerRef} className="turnstile-widget" />
         {!turnstileSiteKey && <p className="field-hint">Turnstile is not configured for this environment.</p>}
       </div>
-      {error && <div className="form-message form-error" role="alert">{error}</div>}
-      {success && <div className="form-message form-success" role="status">{success}</div>}
-      <div><button type="submit" disabled={loading || !turnstileSiteKey} className="button">{loading ? "Sending..." : "Send message"}{!loading && <ArrowUpRightIcon className="icon-sm" />}</button></div>
+      {error && <div className="form-message form-error" role="alert" aria-live="assertive">{error}</div>}
+      {success && <div className="form-message form-success" role="status" aria-live="polite">{success}</div>}
+      <div><button type="submit" disabled={loading || !turnstileSiteKey} className="button">{loading ? "Sending…" : "Send inquiry"}{!loading && <ArrowUpRightIcon className="icon-sm" />}</button></div>
     </form>
   );
 }

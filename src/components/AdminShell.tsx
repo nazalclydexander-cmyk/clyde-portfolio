@@ -25,6 +25,7 @@ export default function AdminShell({ children, title, description, eyebrow, acti
 
   return (
     <main className="admin-root">
+      <a className="skip-link" href="#admin-content">Skip to admin content</a>
       <aside className="admin-sidebar">
         <div className="admin-sidebar-top">
           <Link href="/admin" className="brand-mark">
@@ -59,7 +60,7 @@ export default function AdminShell({ children, title, description, eyebrow, acti
           </div>
           {actions && <div className="admin-header-actions">{actions}</div>}
         </header>
-        <div className="admin-content">{children}</div>
+        <div id="admin-content" className="admin-content">{children}</div>
       </div>
     </main>
   );

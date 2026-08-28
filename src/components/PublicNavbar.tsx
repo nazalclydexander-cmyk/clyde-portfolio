@@ -5,21 +5,22 @@ import { CloseIcon, GithubIcon, MenuIcon } from "@/components/Icons";
 
 const links = [
   { href: "#about", label: "About" },
-  { href: "#skills", label: "Skills" },
-  { href: "#projects", label: "Projects" },
+  { href: "#skills", label: "Capabilities" },
+  { href: "#projects", label: "Work" },
   { href: "#contact", label: "Contact" },
 ];
 
 export default function PublicNavbar({ displayName, githubUrl }: { displayName: string; githubUrl?: string }) {
   const [open, setOpen] = useState(false);
-  const brandInitial = displayName.trim().charAt(0).toUpperCase() || "C";
 
   return (
     <header className="site-header">
       <div className="site-container nav-inner">
         <a href="#top" className="brand-mark" aria-label={`${displayName} home`}>
-          <span className="brand-symbol">{brandInitial}</span>
-          <span>{displayName}</span>
+          <span className="brand-wordmark">
+            <strong>{displayName}</strong>
+            <small>Cloud Engineer</small>
+          </span>
         </a>
 
         <nav className="desktop-nav" aria-label="Primary navigation">
@@ -27,17 +28,10 @@ export default function PublicNavbar({ displayName, githubUrl }: { displayName: 
         </nav>
 
         <div className="nav-actions">
-          {githubUrl && (
-            <div className="nav-action-group desktop-only">
-              <a className="icon-button nav-github-button" href={githubUrl} target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub">
-                <GithubIcon className="icon-md" />
-              </a>
-              <a className="button button-small nav-contact-button" href="#contact">Get in touch</a>
-            </div>
-          )}
-          {!githubUrl && (
-            <a className="button button-small nav-contact-button desktop-only" href="#contact">Get in touch</a>
-          )}
+          <div className="nav-action-group desktop-only">
+            {githubUrl && <a className="nav-text-action" href={githubUrl} target="_blank" rel="noopener noreferrer"><GithubIcon className="icon-sm" />GitHub</a>}
+            <a className="nav-text-action" href="#contact">Contact</a>
+          </div>
           <button className="icon-button menu-button" type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="mobile-navigation" aria-label="Toggle navigation">
             {open ? <CloseIcon className="icon-md" /> : <MenuIcon className="icon-md" />}
           </button>

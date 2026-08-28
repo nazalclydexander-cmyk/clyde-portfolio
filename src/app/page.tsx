@@ -1,9 +1,10 @@
-import { supabase } from "@/lib/supabase";
-import { formatSupabaseError, PORTFOLIO_PROFILE_PUBLIC_SELECT, PORTFOLIO_PROFILE_TABLE, type PortfolioProfilePublic } from "@/lib/portfolioProfile";
-import { connection } from "next/server";
+/* eslint-disable @next/next/no-img-element -- Dynamic Supabase image URLs are rendered without Next image loader assumptions. */
 import ContactForm from "@/components/ContactForm";
-import PublicNavbar from "@/components/PublicNavbar";
 import { ArrowUpRightIcon, GithubIcon } from "@/components/Icons";
+import PublicNavbar from "@/components/PublicNavbar";
+import { formatSupabaseError, PORTFOLIO_PROFILE_PUBLIC_SELECT, PORTFOLIO_PROFILE_TABLE, type PortfolioProfilePublic } from "@/lib/portfolioProfile";
+import { supabase } from "@/lib/supabase";
+import { connection } from "next/server";
 
 type Project = {
   id: string;
@@ -48,18 +49,11 @@ export default async function Home() {
   const additionalProjects = featuredProject ? portfolioProjects.filter((project) => project.id !== featuredProject.id) : [];
   const githubUrl = portfolioProfile?.github_url || portfolioProjects.find((project) => project.github_url)?.github_url || undefined;
   const heroName = portfolioProfile?.display_name?.trim() || "Clyde";
-  const heroAvailability = portfolioProfile?.availability_text?.trim() || "Open to opportunities";
-  const heroHeadline = portfolioProfile?.headline?.trim() || "Building practical systems across cloud, infrastructure, and the web.";
-  const heroBio = portfolioProfile?.short_bio?.trim() || "I'm Clyde - a technical support, cloud, and development professional focused on reliable solutions that solve real operational problems.";
+  const heroAvailability = portfolioProfile?.availability_text?.trim() || "Open to select opportunities";
+  const heroHeadline = portfolioProfile?.headline?.trim() || "Practical cloud, infrastructure, and web systems built for real operations.";
+  const heroBio = portfolioProfile?.short_bio?.trim() || "I help teams solve operational problems with reliable systems, practical support, and web tools that are clear enough to maintain.";
+  const heroLocation = portfolioProfile?.location?.trim() || "";
   const hasPortrait = Boolean(portfolioProfile?.profile_image_url);
-  const heroMeta = [
-    { label: "Focus", value: portfolioProfile?.focus?.trim() || "Technical support" },
-    { label: "Environment", value: portfolioProfile?.environment?.trim() || "Cloud & infrastructure" },
-    { label: "Builds", value: portfolioProfile?.builds?.trim() || "Modern web systems" },
-    { label: "Approach", value: portfolioProfile?.approach?.trim() || "Practical & reliable" },
-    { label: "Location", value: portfolioProfile?.location?.trim() || "" },
-  ].filter((item) => item.value);
-
   const groupedSkills = portfolioSkills.reduce<Record<string, Skill[]>>((groups, skill) => {
     const category = skill.category?.trim() || "Other";
     (groups[category] ||= []).push(skill);
@@ -67,113 +61,197 @@ export default async function Home() {
   }, {});
 
   return (
-    <main id="top">
+    <main id="top" className="portfolio-shell">
+      <a className="skip-link" href="#hero-title">Skip to main content</a>
       <PublicNavbar displayName={heroName} githubUrl={githubUrl} />
 
       <section className="hero" aria-labelledby="hero-title">
-        <div className={`site-container hero-inner ${hasPortrait ? "hero-has-portrait" : "hero-no-portrait"}`}>
+        <div className="site-container hero-inner">
           <div className="hero-copy-column">
-            <div className="availability"><span />{heroAvailability}</div>
-            <h1 id="hero-title">{splitHeadline(heroHeadline)}</h1>
+            <p className="availability">{heroAvailability}{heroLocation ? ` / ${heroLocation}` : ""}</p>
+            <h1 id="hero-title">{heroHeadline}</h1>
             <p className="hero-copy">{heroBio}</p>
             <div className="hero-actions">
-              <a className="button" href="#projects">View projects <ArrowUpRightIcon className="icon-sm" /></a>
-              <a className="button button-secondary" href="#contact">Contact me</a>
-              {githubUrl && <a className="button button-ghost" href={githubUrl} target="_blank" rel="noreferrer"><GithubIcon className="icon-sm" />GitHub</a>}
+              <a className="button" href="#contact">Contact</a>
+              <a className="button button-secondary" href="#projects">View projects</a>
+              {githubUrl ? <a className="button button-secondary" href={githubUrl} target="_blank" rel="noopener noreferrer"><GithubIcon className="icon-sm" />GitHub</a> : null}
             </div>
           </div>
 
-          {(hasPortrait || heroMeta.length) ? (
-            <div className="hero-side-column">
-              {hasPortrait ? (
-                <figure className="hero-portrait">
-                  <img src={portfolioProfile?.profile_image_url || ""} alt={`${heroName} profile portrait`} />
-                </figure>
-              ) : null}
-
-              {heroMeta.length ? (
-                <dl className="hero-meta" aria-label="Professional focus">
-                  <div className="hero-meta-heading"><dt>Name</dt><dd>{heroName}</dd></div>
-                  {heroMeta.map((item) => <div className="hero-meta-row" key={item.label}><dt>{item.label}</dt><dd>{item.value}</dd></div>)}
-                </dl>
-              ) : null}
-            </div>
-          ) : null}
+          <div className="hero-side-column">
+            {hasPortrait ? (
+              <figure className="hero-portrait">
+                <img src={portfolioProfile?.profile_image_url || ""} alt={`${heroName} profile portrait`} width={640} height={800} fetchPriority="high" />
+                <figcaption>{heroName}</figcaption>
+              </figure>
+            ) : (
+              <div className="hero-monogram" aria-label={heroName}>
+                <strong>{heroName}</strong>
+                <p>Cloud, infrastructure, and web systems</p>
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
       <section id="about" className="section">
-        <div className="site-container section-grid">
-          <div className="section-heading"><p className="eyebrow">01 / About</p><h2>Technical breadth, practical focus.</h2></div>
-          <div className="about-copy">
-            <p>I am interested in cloud technologies, technical support, system administration, and web development. I enjoy building useful systems and continuously improving my technical skills.</p>
-            <dl className="about-details">
-              <div className="about-detail"><dt>Primary focus</dt><dd>Cloud & technical support</dd></div>
-              <div className="about-detail"><dt>Development</dt><dd>Modern web applications</dd></div>
-              <div className="about-detail"><dt>Interests</dt><dd>Systems & infrastructure</dd></div>
-              <div className="about-detail"><dt>Working style</dt><dd>Useful, clear, dependable</dd></div>
-            </dl>
+        <div className="site-container intro-grid">
+          <div className="section-heading">
+            <h2>Technical breadth that stays grounded in business reality.</h2>
+          </div>
+          <div className="intro-copy">
+            <p>
+              My work covers technical support, cloud infrastructure, operations, and web delivery. I focus on systems that are easier to run, easier to support, and useful to the people depending on them.
+            </p>
+            <p>
+              Whether the need is a stronger internal workflow, a cleaner web presence, or a more dependable setup behind the scenes, I aim to make the work feel stable, intentional, and worth trusting.
+            </p>
           </div>
         </div>
       </section>
 
       <section id="skills" className="section">
         <div className="site-container section-grid">
-          <div className="section-heading"><p className="eyebrow">02 / Capabilities</p><h2>Tools and technologies.</h2><p>A working toolkit spanning support, cloud systems, infrastructure, and application development.</p></div>
-          <div className="skills-list">
+          <div className="section-heading">
+            <h2>A working toolkit across support, systems, cloud, and delivery.</h2>
+            <p>This reflects the range I use to diagnose issues, build solutions, and keep systems workable over time.</p>
+          </div>
+
+          <div className="skills-board">
             {Object.keys(groupedSkills).length ? Object.entries(groupedSkills).map(([category, items]) => (
-              <div className="skill-group" key={category}><h3>{category}</h3><div className="skill-items">{items.map((skill) => <span className="skill-item" key={skill.id}>{skill.name}</span>)}</div></div>
+              <section className="skill-group" key={category}>
+                <div className="skill-group-heading">
+                  <h3>{category}</h3>
+                </div>
+                <div className="skill-items">
+                  {items.map((skill) => <span className="skill-item" key={skill.id}>{skill.name}</span>)}
+                </div>
+              </section>
             )) : <p className="muted">No skills added yet.</p>}
           </div>
         </div>
       </section>
 
-      <section id="projects" className="section">
+      <section id="projects" className="section section-muted">
         <div className="site-container">
-          <div className="section-heading"><p className="eyebrow">03 / Selected work</p><h2>Projects built to be useful.</h2><p>A selection of systems and applications, from the underlying technical decisions to the finished interface.</p></div>
+          <div className="section-heading">
+            <h2>Projects I&apos;ve recently worked on.</h2>
+          </div>
+
           {featuredProject ? (
-            <div className="projects-stack">
-              <FeaturedProject project={featuredProject} index={0} />
+            <div className="case-studies">
+              <FeaturedProject project={featuredProject} />
+              {additionalProjects.length > 0 ? (
+                <div className="case-study-list">
+                  {additionalProjects.map((project) => <ProjectCaseStudy key={project.id} project={project} />)}
+                </div>
+              ) : null}
             </div>
           ) : <div className="empty-state">No projects available yet.</div>}
-          {additionalProjects.length > 0 && <div className="additional-projects">{additionalProjects.map((project, index) => <ProjectCard key={project.id} project={project} index={index + 1} />)}</div>}
         </div>
       </section>
 
       <section id="contact" className="section">
         <div className="site-container contact-grid">
           <div className="contact-aside">
-            <div className="section-heading"><p className="eyebrow">04 / Contact</p><h2>Let&apos;s talk about the work.</h2><p>Have a role, project, or technical problem in mind? Send the details and I&apos;ll get back to you.</p></div>
-            <p className="contact-note">Messages are sent securely through this portfolio and reviewed directly.</p>
+            <div className="section-heading">
+              <h2>Let&apos;s talk about the role, system, or business problem you need solved.</h2>
+              <p>I am open to full-time opportunities, contract work, and practical projects where reliability matters.</p>
+            </div>
+
+            <p className="contact-note">Share the context, what needs improving, and any constraints you are working with. I&apos;ll read it directly and respond with care.</p>
           </div>
-          <ContactForm />
+
+          <div className="contact-panel">
+            <ContactForm />
+          </div>
         </div>
       </section>
 
-      <footer className="footer"><div className="site-container footer-inner"><div><div className="footer-title">{heroName}</div><p className="footer-subtitle">{buildFooterSubtitle(portfolioProfile)}</p></div><div className="footer-links"><a href="#projects">Projects</a><a href="#contact">Contact</a>{githubUrl && <a href={githubUrl} target="_blank" rel="noreferrer">GitHub</a>}<span>Next.js · Supabase · Vercel</span></div></div></footer>
+      <footer className="footer">
+        <div className="site-container footer-inner">
+          <div>
+            <div className="footer-title">Practical cloud, support, and web systems for real operations.</div>
+            <p className="footer-subtitle">{buildFooterSubtitle(portfolioProfile)}</p>
+          </div>
+          <div className="footer-links">
+            <a href="#about">About</a>
+            <a href="#skills">Capabilities</a>
+            <a href="#projects">Work</a>
+            <a href="#contact">Contact</a>
+            {githubUrl ? (
+              <a href={githubUrl} target="_blank" rel="noopener noreferrer">
+                <GithubIcon className="icon-sm" />
+                GitHub
+              </a>
+            ) : null}
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }
 
-function splitHeadline(headline: string) {
-  const sentence = headline.trim();
-  const pivot = sentence.indexOf(" across ");
-  if (pivot === -1) return sentence;
-  return <>{sentence.slice(0, pivot)} <span>{sentence.slice(pivot + 1)}</span></>;
+function buildFooterSubtitle(profile: PortfolioProfilePublic | null) {
+  const role = profile?.focus?.trim() || "Cloud Engineer";
+  const location = profile?.location?.trim();
+  return location ? `${role} · ${location}` : role;
 }
 
-function buildFooterSubtitle(profile: PortfolioProfilePublic | null) {
-  const parts = [profile?.focus?.trim(), profile?.environment?.trim(), profile?.builds?.trim()].filter(Boolean);
-  return parts.length ? parts.join(" · ") : "Technical Support · Cloud · Developer";
+function normalizeText(value: string | null | undefined) {
+  return value?.replace(/\s+/g, " ").trim() || "";
+}
+
+function excerptText(value: string, maxLength = 260) {
+  if (value.length <= maxLength) return value;
+  const sentenceBreak = value.slice(0, maxLength).lastIndexOf(".");
+  const wordBreak = value.slice(0, maxLength).lastIndexOf(" ");
+  const cutPoint = sentenceBreak > 120 ? sentenceBreak + 1 : Math.max(wordBreak, 120);
+  return `${value.slice(0, cutPoint).trim()}…`;
+}
+
+function getProjectPreview(project: Project) {
+  const summary = normalizeText(project.description) || "Project details coming soon.";
+  const details = normalizeText(project.long_description);
+  const repeatedDetails = details.toLowerCase() === summary.toLowerCase() || details.toLowerCase().startsWith(summary.toLowerCase());
+
+  return {
+    summary,
+    details: details && !repeatedDetails ? excerptText(details) : "",
+  };
 }
 
 function ProjectMedia({ project, featured = false }: { project: Project; featured?: boolean }) {
-  return <div className={`project-visual${featured ? " project-visual-featured" : ""}`}>{project.image_url ? <img src={project.image_url} alt={`${project.title} project screenshot`} /> : <div className="project-placeholder">Project preview</div>}</div>;
+  return (
+    <div className={`project-visual${featured ? " project-visual-featured" : ""}`}>
+      {project.image_url ? (
+        <img src={project.image_url} alt={`${project.title} project screenshot`} width={1200} height={750} loading={featured ? "eager" : "lazy"} fetchPriority={featured ? "high" : undefined} />
+      ) : (
+        <div className="project-placeholder">Project preview</div>
+      )}
+    </div>
+  );
 }
 
 function ProjectLinks({ project }: { project: Project }) {
   if (!project.demo_url && !project.github_url) return null;
-  return <div className="project-links">{project.demo_url && <a href={project.demo_url} target="_blank" rel="noreferrer">Live demo <ArrowUpRightIcon className="icon-sm" /></a>}{project.github_url && <a href={project.github_url} target="_blank" rel="noreferrer"><GithubIcon className="icon-sm" />GitHub</a>}</div>;
+
+  return (
+    <div className="project-links">
+      {project.demo_url ? (
+        <a className="button button-secondary" href={project.demo_url} target="_blank" rel="noopener noreferrer">
+          Live preview
+          <ArrowUpRightIcon className="icon-sm" />
+        </a>
+      ) : null}
+      {project.github_url ? (
+        <a className="button button-secondary" href={project.github_url} target="_blank" rel="noopener noreferrer">
+          <GithubIcon className="icon-sm" />
+          GitHub
+        </a>
+      ) : null}
+    </div>
+  );
 }
 
 function TechList({ technologies }: { technologies: string[] | null }) {
@@ -181,10 +259,44 @@ function TechList({ technologies }: { technologies: string[] | null }) {
   return <div className="tech-list">{technologies.map((technology) => <span key={technology}>{technology}</span>)}</div>;
 }
 
-function FeaturedProject({ project, index }: { project: Project; index: number }) {
-  return <article className="featured-project"><ProjectMedia project={project} featured /><div className="project-content"><span className="project-index">PROJECT / {String(index + 1).padStart(2, "0")}</span><h3>{project.title}</h3><p>{project.description || "Project details coming soon."}</p><TechList technologies={project.technologies} /><ProjectLinks project={project} /></div></article>;
+function FeaturedProject({ project }: { project: Project }) {
+  const preview = getProjectPreview(project);
+
+  return (
+    <article className="featured-case-study">
+      <div className="featured-case-copy">
+        <h3>{project.title}</h3>
+        <p className="featured-case-summary">{preview.summary}</p>
+
+        {preview.details ? (
+          <p className="project-preview-note">{preview.details}</p>
+        ) : null}
+
+        <TechList technologies={project.technologies} />
+        <ProjectLinks project={project} />
+      </div>
+
+      <ProjectMedia project={project} featured />
+    </article>
+  );
 }
 
-function ProjectCard({ project, index }: { project: Project; index: number }) {
-  return <article className="project-card"><div className="project-card-copy"><span className="project-index">PROJECT / {String(index + 1).padStart(2, "0")}</span><h3>{project.title}</h3><p>{project.description || "Project details coming soon."}</p><TechList technologies={project.technologies} /><ProjectLinks project={project} /></div><ProjectMedia project={project} /></article>;
+function ProjectCaseStudy({ project }: { project: Project }) {
+  const preview = getProjectPreview(project);
+
+  return (
+    <article className="case-study-card">
+      <ProjectMedia project={project} />
+      <div className="case-study-details">
+        <div className="case-study-header">
+          <div>
+            <h3>{project.title}</h3>
+          </div>
+        </div>
+        <p className="case-study-point">{preview.details || preview.summary}</p>
+        <ProjectLinks project={project} />
+        <TechList technologies={project.technologies} />
+      </div>
+    </article>
+  );
 }

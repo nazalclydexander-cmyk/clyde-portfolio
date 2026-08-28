@@ -58,7 +58,7 @@ export default function AdminDashboard() {
       </section>
 
       <section className="admin-section">
-        <div className="admin-section-head"><h2>Recent projects</h2><Link href="/admin/projects" className="muted">View all →</Link></div>
+        <div className="admin-section-head"><h2>Recent projects</h2><Link href="/admin/projects" className="muted">View all</Link></div>
         <div className="data-list">
           {projects.length ? projects.map((project) => (
             <div className="data-row" key={project.id}><div className="data-row-main"><div className="data-row-title"><h3>{project.title}</h3><StatusBadge status={project.status} /></div><p>Created {new Date(project.created_at).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}</p></div><Link className="button button-ghost button-small" href="/admin/projects">Manage</Link></div>

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- Admin previews use Supabase and object URLs that should remain loader-independent. */
 "use client";
 
 import { ChangeEvent, FormEvent, useCallback, useEffect, useState } from "react";
@@ -332,7 +333,7 @@ export default function AdminProfile() {
     }
   }
 
-  if (loading) return <main className="loading-screen">Loading profile...</main>;
+  if (loading) return <main className="loading-screen">Loading profile…</main>;
 
   return (
     <AdminShell
@@ -353,8 +354,8 @@ export default function AdminProfile() {
               <input className="upload-input" id="profile-image" type="file" accept="image/png,image/jpeg,image/webp" onChange={handleImageChange} />
               <p className="upload-meta">{selectedImage ? `Selected: ${selectedImage.name}` : "PNG, JPG, or WebP up to 4MB. A portrait crop works best."}</p>
               <div className="profile-upload-actions">
-                <button type="button" disabled={!selectedImage || uploadingImage} onClick={saveProfileImage} className="button button-secondary button-small"><UploadIcon className="icon-sm" />{uploadingImage ? "Uploading..." : "Upload now"}</button>
-                <button type="button" disabled={(!form.profile_image_url && !selectedImage) || removingImage} onClick={handleRemoveImage} className="button button-ghost button-small"><TrashIcon className="icon-sm" />{removingImage ? "Removing..." : "Remove image"}</button>
+                <button type="button" disabled={!selectedImage || uploadingImage} onClick={saveProfileImage} className="button button-secondary button-small"><UploadIcon className="icon-sm" />{uploadingImage ? "Uploading…" : "Upload now"}</button>
+                <button type="button" disabled={(!form.profile_image_url && !selectedImage) || removingImage} onClick={handleRemoveImage} className="button button-ghost button-small"><TrashIcon className="icon-sm" />{removingImage ? "Removing…" : "Remove image"}</button>
               </div>
             </div>
 
@@ -362,7 +363,7 @@ export default function AdminProfile() {
               {(previewUrl || form.profile_image_url) ? (
                 <div className="profile-image-preview">
                   <span>{previewUrl ? "Selected image preview" : "Current public image"}</span>
-                  <img src={previewUrl || form.profile_image_url} alt="Profile preview" />
+                  <img src={previewUrl || form.profile_image_url} alt="Profile preview" width={480} height={600} />
                 </div>
               ) : (
                 <div className="profile-image-empty">No profile image uploaded yet.</div>
@@ -390,14 +391,14 @@ export default function AdminProfile() {
           <section className="form-section">
             <h3 className="form-section-title">Links and metadata</h3>
             <div className="form-grid two-col">
-              <Field label="GitHub URL" id="profile-github"><input id="profile-github" type="url" value={form.github_url} onChange={(event) => update("github_url", event.target.value)} placeholder="https://github.com/..." /></Field>
+              <Field label="GitHub URL" id="profile-github"><input id="profile-github" type="url" value={form.github_url} onChange={(event) => update("github_url", event.target.value)} placeholder="https://github.com/clyde/example…" /></Field>
               <Field label="Location" id="profile-location"><input id="profile-location" value={form.location} onChange={(event) => update("location", event.target.value)} placeholder="Optional" /></Field>
               <Field label="Focus" id="profile-focus"><input id="profile-focus" value={form.focus} onChange={(event) => update("focus", event.target.value)} placeholder="Technical support" /></Field>
               <Field label="Environment" id="profile-environment"><input id="profile-environment" value={form.environment} onChange={(event) => update("environment", event.target.value)} placeholder="Cloud and infrastructure" /></Field>
               <Field label="Builds" id="profile-builds"><input id="profile-builds" value={form.builds} onChange={(event) => update("builds", event.target.value)} placeholder="Modern web systems" /></Field>
               <Field label="Approach" id="profile-approach"><input id="profile-approach" value={form.approach} onChange={(event) => update("approach", event.target.value)} placeholder="Practical and reliable" /></Field>
               <div className="field-full">
-                <button type="submit" disabled={saving} className="button">{saving ? "Saving..." : "Save profile"}</button>
+                <button type="submit" disabled={saving} className="button">{saving ? "Saving…" : "Save profile"}</button>
               </div>
             </div>
           </section>

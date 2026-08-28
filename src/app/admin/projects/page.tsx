@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- Admin previews use Supabase and object URLs that should remain loader-independent. */
 "use client";
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
@@ -294,7 +295,7 @@ export default function ManageProjects() {
     setSuccess("Project deleted successfully.");
   }
 
-  if (loading) return <main className="loading-screen">Loading projects...</main>;
+  if (loading) return <main className="loading-screen">Loading projects…</main>;
 
   return (
     <AdminShell
@@ -346,10 +347,10 @@ export default function ManageProjects() {
           <FormSection title="Links & technology">
             <div className="form-grid two-col">
               <Field label="GitHub URL" id="github-url">
-                <input id="github-url" type="url" value={form.github_url} onChange={(event) => update("github_url", event.target.value)} placeholder="https://github.com/..." />
+                <input id="github-url" type="url" value={form.github_url} onChange={(event) => update("github_url", event.target.value)} placeholder="https://github.com/clyde/project…" />
               </Field>
               <Field label="Live demo URL" id="demo-url">
-                <input id="demo-url" type="url" value={form.demo_url} onChange={(event) => update("demo_url", event.target.value)} placeholder="https://..." />
+                <input id="demo-url" type="url" value={form.demo_url} onChange={(event) => update("demo_url", event.target.value)} placeholder="https://example.com/project…" />
               </Field>
               <Field label="Technologies" id="technologies" className="field-full">
                 <input id="technologies" value={form.technologies} onChange={(event) => update("technologies", event.target.value)} placeholder="Next.js, Supabase, Vercel" />
@@ -364,12 +365,12 @@ export default function ManageProjects() {
               <p className="upload-meta">{selectedImage ? `Selected: ${selectedImage.name}` : "PNG, JPG, or WebP. A 16:10 landscape image works best."}</p>
               <button type="button" disabled={!selectedImage || uploadingImage} onClick={uploadProjectImage} className="button button-secondary button-small" style={{ marginTop: ".8rem" }}>
                 <UploadIcon className="icon-sm" />
-                {uploadingImage ? "Uploading..." : "Upload now"}
+                {uploadingImage ? "Uploading…" : "Upload now"}
               </button>
               {(previewUrl || form.image_url) && (
                 <div className="image-preview">
                   <span>{previewUrl ? "Selected image preview" : "Current image"}</span>
-                  <img src={previewUrl || form.image_url} alt="Project image preview" />
+                  <img src={previewUrl || form.image_url} alt="Project image preview" width={640} height={400} />
                 </div>
               )}
             </div>
@@ -398,7 +399,7 @@ export default function ManageProjects() {
               </label>
               <div className="field-full">
                 <button type="submit" disabled={saving} className="button">
-                  {saving ? "Saving..." : editingId ? "Update project" : "Add project"}
+                  {saving ? "Saving…" : editingId ? "Update project" : "Add project"}
                 </button>
               </div>
             </div>
