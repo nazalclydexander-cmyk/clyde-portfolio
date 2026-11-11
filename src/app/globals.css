@@ -344,6 +344,7 @@ img{max-width:100%}
   padding:1.1rem 0;
   border-bottom:1px solid var(--line-soft);
 }
+.certification-badge{width:72px;height:72px;object-fit:contain;border-radius:.6rem;background:var(--surface);border:1px solid var(--line);padding:.35rem}
 .certification-row:last-child{border-bottom:0}
 .certification-main{min-width:0}
 .certification-title-row{display:flex;flex-wrap:wrap;align-items:center;gap:.55rem}
