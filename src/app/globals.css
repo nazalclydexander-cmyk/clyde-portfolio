@@ -220,6 +220,7 @@ img{max-width:100%}
 }
 .hero-actions{display:flex;flex-wrap:wrap;gap:.65rem;margin-top:1.55rem}
 .hero-side-column{display:grid;gap:1rem}
+.hero-portrait-interaction{position:relative;min-width:0;pointer-events:auto}
 .hero-portrait{
   margin:0;
   overflow:hidden;

@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element -- Portrait URLs are stored in Supabase and may be remote. */
 
-import { useEffect, useMemo, useState, type PointerEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import {
   directionalPortraitSources,
   PORTRAIT_DIRECTIONS,
@@ -33,11 +33,15 @@ const POINTER_DIRECTIONS: Record<number, Exclude<PortraitDirection, "neutral">> 
   315: "up-right",
 };
 
+const INTERACTION_PADDING = 112;
+
 export default function DirectionalPortrait({ neutralSrc, alt, caption, sources = directionalPortraitSources, enabled = true }: DirectionalPortraitProps) {
   const [direction, setDirection] = useState<PortraitDirection>("neutral");
   const [failedDirections, setFailedDirections] = useState<Set<PortraitDirection>>(new Set());
   const [isPointerCapable, setIsPointerCapable] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const interactionRef = useRef<HTMLDivElement>(null);
+  const portraitStageRef = useRef<HTMLDivElement>(null);
 
   const directionalImages = useMemo(
     () => NON_NEUTRAL_DIRECTIONS
@@ -46,8 +50,39 @@ export default function DirectionalPortrait({ neutralSrc, alt, caption, sources 
     [failedDirections, neutralSrc, sources],
   );
 
-  const visibleDirection = isPointerCapable && !prefersReducedMotion && direction !== "neutral" && sources[direction] && sources[direction] !== neutralSrc && !failedDirections.has(direction) ? direction : "neutral";
   const isInteractive = enabled && isPointerCapable && !prefersReducedMotion;
+  const visibleDirection = isInteractive && direction !== "neutral" && sources[direction] && sources[direction] !== neutralSrc && !failedDirections.has(direction) ? direction : "neutral";
+
+  const updateDirectionFromPointer = useCallback((clientX: number, clientY: number) => {
+    if (!isInteractive) return;
+
+    const interactionBounds = interactionRef.current?.getBoundingClientRect();
+    const portraitBounds = portraitStageRef.current?.getBoundingClientRect();
+    if (!interactionBounds || !portraitBounds) return;
+
+    const isWithinInteractionZone = clientX >= interactionBounds.left - INTERACTION_PADDING &&
+      clientX <= interactionBounds.right + INTERACTION_PADDING &&
+      clientY >= interactionBounds.top - INTERACTION_PADDING &&
+      clientY <= interactionBounds.bottom + INTERACTION_PADDING;
+
+    if (!isWithinInteractionZone) {
+      setDirection("neutral");
+      return;
+    }
+
+    const x = clientX - (portraitBounds.left + portraitBounds.width / 2);
+    const y = clientY - (portraitBounds.top + portraitBounds.height / 2);
+    const distance = Math.hypot(x, y);
+
+    if (distance < Math.min(portraitBounds.width, portraitBounds.height) * 0.12) {
+      setDirection("neutral");
+      return;
+    }
+
+    const angle = Math.round((Math.atan2(y, x) * 180) / Math.PI / 45) * 45;
+    const normalizedAngle = (angle + 360) % 360;
+    setDirection(POINTER_DIRECTIONS[normalizedAngle] || "neutral");
+  }, [isInteractive]);
 
   useEffect(() => {
     const pointerQuery = window.matchMedia("(pointer: fine)");
@@ -80,22 +115,32 @@ export default function DirectionalPortrait({ neutralSrc, alt, caption, sources 
     });
   }, [directionalImages, isInteractive]);
 
-  function handlePointerMove(event: PointerEvent<HTMLElement>) {
+  useEffect(() => {
+    if (!isInteractive) return;
+
+    const handleWindowPointerMove = (event: globalThis.PointerEvent) => {
+      if (event.pointerType === "touch") return;
+      updateDirectionFromPointer(event.clientX, event.clientY);
+    };
+    const resetDirection = () => setDirection("neutral");
+    const handleWindowPointerOut = (event: globalThis.PointerEvent) => {
+      if (!event.relatedTarget) resetDirection();
+    };
+
+    window.addEventListener("pointermove", handleWindowPointerMove);
+    window.addEventListener("pointerout", handleWindowPointerOut);
+    window.addEventListener("blur", resetDirection);
+
+    return () => {
+      window.removeEventListener("pointermove", handleWindowPointerMove);
+      window.removeEventListener("pointerout", handleWindowPointerOut);
+      window.removeEventListener("blur", resetDirection);
+    };
+  }, [isInteractive, updateDirectionFromPointer]);
+
+  function handlePointerMove(event: ReactPointerEvent<HTMLDivElement>) {
     if (!isInteractive || event.pointerType === "touch") return;
-
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const x = event.clientX - bounds.left - bounds.width / 2;
-    const y = event.clientY - bounds.top - bounds.height / 2;
-    const distance = Math.hypot(x, y);
-
-    if (distance < Math.min(bounds.width, bounds.height) * 0.12) {
-      setDirection("neutral");
-      return;
-    }
-
-    const angle = Math.round((Math.atan2(y, x) * 180) / Math.PI / 45) * 45;
-    const normalizedAngle = (angle + 360) % 360;
-    setDirection(POINTER_DIRECTIONS[normalizedAngle] || "neutral");
+    updateDirectionFromPointer(event.clientX, event.clientY);
   }
 
   function handleDirectionalImageError(state: Exclude<PortraitDirection, "neutral">) {
@@ -104,38 +149,40 @@ export default function DirectionalPortrait({ neutralSrc, alt, caption, sources 
   }
 
   return (
-    <figure
-      className="hero-portrait"
-      data-portrait-direction={visibleDirection}
+    <div
+      ref={interactionRef}
+      className="hero-portrait-interaction"
       onPointerMove={handlePointerMove}
-      onPointerLeave={() => setDirection("neutral")}
+      onPointerLeave={(event) => updateDirectionFromPointer(event.clientX, event.clientY)}
     >
-      <div className="portrait-stage">
-        <img
-          src={neutralSrc}
-          alt={visibleDirection === "neutral" ? alt : ""}
-          aria-hidden={visibleDirection !== "neutral"}
-          width={640}
-          height={800}
-          fetchPriority="high"
-        />
-        {isInteractive ? directionalImages.map(({ state, src }) => (
+      <figure className="hero-portrait" data-portrait-direction={visibleDirection}>
+        <div ref={portraitStageRef} className="portrait-stage">
           <img
-            key={state}
-            className="portrait-directional-image"
-            src={src}
-            alt={visibleDirection === state ? alt : ""}
-            aria-hidden={visibleDirection !== state}
+            src={neutralSrc}
+            alt={visibleDirection === "neutral" ? alt : ""}
+            aria-hidden={visibleDirection !== "neutral"}
             width={640}
             height={800}
-            loading="eager"
-            data-portrait-state={state}
-            onError={() => handleDirectionalImageError(state)}
-            style={{ opacity: visibleDirection === state ? 1 : 0 }}
+            fetchPriority="high"
           />
-        )) : null}
-      </div>
-      <figcaption>{caption}</figcaption>
-    </figure>
+          {isInteractive ? directionalImages.map(({ state, src }) => (
+            <img
+              key={state}
+              className="portrait-directional-image"
+              src={src}
+              alt={visibleDirection === state ? alt : ""}
+              aria-hidden={visibleDirection !== state}
+              width={640}
+              height={800}
+              loading="eager"
+              data-portrait-state={state}
+              onError={() => handleDirectionalImageError(state)}
+              style={{ opacity: visibleDirection === state ? 1 : 0 }}
+            />
+          )) : null}
+        </div>
+        <figcaption>{caption}</figcaption>
+      </figure>
+    </div>
   );
 }
