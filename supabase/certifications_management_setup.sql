@@ -14,7 +14,7 @@ drop policy if exists "Portfolio admins manage certifications" on public.certifi
 create policy "Portfolio admins manage certifications" on public.certifications for all to authenticated using (public.is_portfolio_admin()) with check (public.is_portfolio_admin());
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('certification-badges', 'certification-badges', true, 5242880, array['image/jpeg','image/png','image/webp','image/svg+xml'])
-on conflict (id) do update set public = true, file_size_limit = 5242880;
+on conflict (id) do update set public = true, file_size_limit = 5242880, allowed_mime_types = excluded.allowed_mime_types;
 drop policy if exists "Public can view certification badges" on storage.objects;
 create policy "Public can view certification badges" on storage.objects for select using (bucket_id = 'certification-badges');
 drop policy if exists "Portfolio admins upload certification badges" on storage.objects;

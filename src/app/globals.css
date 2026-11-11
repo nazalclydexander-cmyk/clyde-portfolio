@@ -336,16 +336,23 @@ img{max-width:100%}
   font-size:1rem;
   line-height:1.45;
 }
-.certifications-list{display:grid;border-block:1px solid var(--line);background:transparent}
+.certifications-list{display:grid;gap:.75rem;background:transparent}
 .certification-row{
   display:grid;
   gap:1rem;
   min-width:0;
-  padding:1.1rem 0;
-  border-bottom:1px solid var(--line-soft);
+  padding:1.15rem;
+  border:1px solid var(--line);
+  border-radius:var(--radius-md);
+  background:var(--surface);
+  transition:border-color 160ms ease,background 160ms ease,transform 160ms ease;
 }
-.certification-badge{width:72px;height:72px;object-fit:contain;border-radius:.6rem;background:var(--surface);border:1px solid var(--line);padding:.35rem}
-.certification-row:last-child{border-bottom:0}
+.certification-row:hover{border-color:var(--muted);background:var(--surface-strong);transform:translateY(-1px)}
+.certification-badge-trigger{width:fit-content;align-self:center;border:0;background:transparent;color:inherit;padding:0;cursor:zoom-in}
+.certification-badge-trigger:focus-visible{outline:2px solid var(--accent-strong);outline-offset:4px;border-radius:var(--radius-md)}
+.certification-badge-frame{display:grid;place-items:center;width:160px;height:160px;padding:.5rem;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--bg);transition:border-color 160ms ease,background 160ms ease,transform 160ms ease}
+.certification-badge-trigger:hover .certification-badge-frame{border-color:var(--accent-strong);background:var(--surface-strong);transform:translateY(-1px)}
+.certification-badge{display:block;width:100%;height:100%;object-fit:contain}
 .certification-main{min-width:0}
 .certification-title-row{display:flex;flex-wrap:wrap;align-items:center;gap:.55rem}
 .certification-title-row h3{margin:0;font-size:1.18rem;line-height:1.35;font-weight:800;overflow-wrap:anywhere}
@@ -356,10 +363,20 @@ img{max-width:100%}
 .certification-meta dd{margin:.2rem 0 0;color:var(--ink-soft);font-size:.95rem;overflow-wrap:anywhere}
 .certification-link{width:fit-content;display:inline-flex;align-items:center;gap:.4rem;color:var(--accent-strong);font-size:.95rem;font-weight:800;text-decoration:underline;text-decoration-color:rgba(185,215,226,.45);text-underline-offset:.2em}
 .certification-link:hover{color:var(--ink)}
+.certification-row .status-badge{padding:.22rem .48rem;font-size:.76rem;letter-spacing:.01em}
 .certification-status-active{border-color:rgba(139,197,165,.45);color:var(--success);background:#142119}
 .certification-status-expired{border-color:rgba(228,155,146,.45);color:var(--danger);background:#2a1719}
 .certification-status-pending{border-color:rgba(215,182,111,.45);color:var(--warning);background:#211c12}
 .certification-empty{padding-inline:0;text-align:left}
+
+.badge-lightbox{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:1.25rem;background:rgba(9,11,13,.88)}
+.badge-lightbox-backdrop{position:absolute;inset:0;border:0;background:transparent;cursor:default}
+.badge-lightbox-dialog{position:relative;z-index:1;width:min(100%,34rem);display:grid;justify-items:center;gap:1rem;padding:1.25rem;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--surface);box-shadow:0 1.25rem 3rem rgba(0,0,0,.34)}
+.badge-lightbox-close{position:absolute;top:.7rem;right:.7rem;z-index:1;display:grid;place-items:center;width:2.75rem;height:2.75rem;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface-strong);color:var(--ink);cursor:pointer;transition:border-color 160ms ease,background 160ms ease}
+.badge-lightbox-close:hover{border-color:var(--accent-strong);background:var(--bg-muted)}
+.badge-lightbox-image-frame{display:grid;place-items:center;width:min(100%,30rem);aspect-ratio:1;padding:1rem;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--bg)}
+.badge-lightbox-image-frame img{display:block;width:100%;height:100%;object-fit:contain}
+.badge-lightbox-dialog p{max-width:28rem;margin:0;color:var(--ink);font-size:1.05rem;font-weight:800;line-height:1.35;text-align:center;overflow-wrap:anywhere}
 
 .case-studies{margin-top:1.6rem}
 .featured-case-study{
@@ -581,8 +598,9 @@ img{max-width:100%}
   border-bottom:1px solid var(--line);
   background:var(--bg);
 }
-.admin-mobile-nav nav{display:flex;gap:.25rem}
+.admin-mobile-nav nav{display:flex;flex:1;min-width:0;justify-content:flex-end;gap:.25rem;overflow-x:auto;scrollbar-width:thin}
 .admin-mobile-nav nav a{
+  flex:0 0 2.75rem;
   display:grid;
   place-items:center;
   width:2.75rem;
@@ -660,6 +678,19 @@ img{max-width:100%}
 .data-row-title h3{min-width:0;margin:0;font-size:1rem;font-weight:800;overflow-wrap:anywhere}
 .data-row p{margin:.35rem 0 0;color:var(--muted-strong);font-size:.95rem;line-height:1.5;overflow-wrap:anywhere}
 .row-actions{display:flex;flex-wrap:wrap;gap:.5rem}
+.certification-admin-card{display:grid;grid-template-columns:5.5rem minmax(0,1fr);align-items:start;gap:1rem;padding:1rem}
+.certification-admin-badge{width:5.5rem;height:5.5rem;display:grid;place-items:center;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--bg-muted);overflow:hidden}
+.certification-admin-badge img{width:100%;height:100%;object-fit:contain;padding:.5rem}
+.certification-admin-badge-empty{display:grid;justify-items:center;gap:.3rem;color:var(--muted);font-size:.72rem;font-weight:800;text-align:center;text-transform:uppercase;letter-spacing:.04em}
+.certification-admin-main{padding-top:.15rem}
+.certification-admin-card .data-row-title h3{font-size:1.08rem;line-height:1.3}
+.certification-admin-card .status-badge{padding:.22rem .48rem;font-size:.76rem;letter-spacing:.01em}
+.certification-admin-issuer{margin-top:.3rem!important;color:var(--ink-soft)!important;font-weight:700}
+.certification-admin-meta{display:flex;flex-wrap:wrap;gap:.65rem 1rem;margin:.8rem 0 0}
+.certification-admin-meta div{min-width:0}
+.certification-admin-meta dt{color:var(--muted);font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.certification-admin-meta dd{margin:.18rem 0 0;color:var(--muted-strong);font-size:.85rem;overflow-wrap:anywhere}
+.certification-admin-actions{grid-column:1/-1;padding-top:.8rem;border-top:1px solid var(--line-soft)}
 .status-badge{
   width:fit-content;
   display:inline-flex;
@@ -678,6 +709,9 @@ img{max-width:100%}
 .status-published{border-color:rgba(141,211,170,.45);color:var(--success);background:#142119}
 .status-draft{border-color:rgba(215,182,111,.45);color:var(--warning);background:#211c12}
 .status-archived{color:var(--muted)}
+.status-active{border-color:rgba(141,211,170,.45);color:var(--success);background:#142119}
+.status-pending{border-color:rgba(215,182,111,.45);color:var(--warning);background:#211c12}
+.status-expired{border-color:rgba(240,160,154,.45);color:var(--danger);background:#2a1719}
 .status-featured,.status-unread{border-color:rgba(139,183,221,.5);color:var(--accent-strong);background:#121e28}
 .admin-notice{margin-bottom:1rem;border:1px solid;padding:.8rem 1rem;font-size:.95rem;line-height:1.45}
 .notice-error{border-color:rgba(240,160,154,.65);background:#2a1719;color:#ffd2cd}
@@ -691,6 +725,25 @@ img{max-width:100%}
 .upload-zone{border:1px solid var(--line);background:var(--bg-muted);padding:1rem}
 .upload-input{max-width:100%;color:var(--muted-strong);font-size:.95rem}
 .upload-meta{margin:.75rem 0 0;color:var(--muted);font-size:.92rem;overflow-wrap:anywhere}
+.badge-upload-zone{position:relative;min-width:0;border:1px dashed var(--line);border-radius:var(--radius-md);background:var(--bg-muted);overflow:hidden;transition:border-color 160ms ease,background 160ms ease}
+.badge-upload-zone:hover,.badge-upload-zone.is-dragging{border-color:var(--accent-strong);background:var(--surface-strong)}
+.badge-upload-zone:focus-within{border-color:var(--accent-strong);outline:2px solid var(--accent-strong);outline-offset:3px}
+.badge-upload-label{display:grid;justify-items:center;gap:.45rem;min-height:12rem;padding:1.35rem;text-align:center;cursor:pointer;transition:background 160ms ease}
+.badge-upload-label:hover{background:rgba(255,255,255,.025)}
+.badge-upload-heading{display:inline-flex;align-items:center;gap:.55rem;color:var(--ink);font-size:1rem;font-weight:800}
+.badge-upload-icon{display:grid;place-items:center;width:2.45rem;height:2.45rem;border:1px solid var(--line);border-radius:50%;background:var(--surface);color:var(--accent-strong)}
+.badge-upload-action{color:var(--accent-strong);font-size:1.08rem;font-weight:850;line-height:1.35}
+.badge-upload-prompt{color:var(--ink-soft);font-size:.96rem;line-height:1.45}
+.badge-upload-help{color:var(--muted);font-size:.86rem;line-height:1.45}
+.badge-upload-removed{max-width:34rem;color:var(--warning);font-size:.84rem;line-height:1.4}
+.badge-file-input{position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.badge-upload-preview{display:grid;place-items:center;width:6.5rem;height:6.5rem;margin-top:.35rem;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--bg);overflow:hidden}
+.badge-upload-preview img{width:100%;height:100%;object-fit:contain;padding:.45rem}
+.badge-upload-footer{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.85rem 1rem;border-top:1px solid var(--line-soft);background:var(--surface)}
+.badge-file-summary{display:grid;min-width:0;gap:.2rem}
+.badge-file-name{color:var(--ink);font-size:.92rem;font-weight:800;overflow-wrap:anywhere}
+.badge-file-state{color:var(--muted);font-size:.8rem;line-height:1.35}
+.badge-upload-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:.5rem;flex:none}
 .image-preview,.profile-image-preview{margin-top:1rem;display:grid;gap:.55rem}
 .image-preview img{width:min(100%,560px);aspect-ratio:16/9;object-fit:contain;border:1px solid var(--line);background:#090b0d}
 .profile-image-preview img{width:min(100%,360px);aspect-ratio:4/5;object-fit:cover;border:1px solid var(--line);border-radius:var(--radius-md);background:#090b0d}
@@ -724,6 +777,9 @@ img{max-width:100%}
   .admin-stats{grid-template-columns:repeat(4,minmax(0,1fr))}
   .management-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .data-row{flex-direction:row;align-items:center;justify-content:space-between}
+  .certification-admin-card{grid-template-columns:6rem minmax(0,1fr) auto;align-items:center}
+  .certification-admin-badge{width:6rem;height:6rem}
+  .certification-admin-actions{grid-column:auto;padding-top:0;border-top:0;justify-content:flex-end}
   .profile-admin-grid{grid-template-columns:minmax(0,.95fr) minmax(260px,.75fr)}
   .login-page{grid-template-columns:minmax(320px,.75fr) minmax(400px,1fr)}
   .login-context{
@@ -738,9 +794,20 @@ img{max-width:100%}
   .login-context p{color:var(--muted);font-size:.92rem;font-weight:800}
 }
 
+@media(max-width:767px){
+  .certification-badge-trigger{justify-self:center}
+  .certification-badge-frame{width:112px;height:112px;padding:.45rem}
+}
+
 @media(min-width:768px){
   .case-study-card{grid-template-columns:minmax(220px,.62fr) minmax(0,1fr);align-items:start}
   .certification-row{grid-template-columns:minmax(0,1fr) minmax(240px,.85fr) auto;align-items:center;gap:1.5rem}
+}
+
+@media(min-width:768px) and (max-width:899px){
+  .certification-row.has-badge{grid-template-columns:140px minmax(0,1fr)}
+  .certification-row.has-badge .certification-meta,.certification-row.has-badge .certification-link{grid-column:2}
+  .certification-badge-frame{width:128px;height:128px;padding:.4rem}
 }
 
 @media(min-width:900px){
@@ -759,6 +826,7 @@ img{max-width:100%}
   }
   .featured-case-copy{padding:0}
   .management-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .certification-row.has-badge{grid-template-columns:180px minmax(0,1fr) minmax(240px,.85fr) auto}
 }
 
 @media(min-width:960px){
@@ -811,9 +879,14 @@ img{max-width:100%}
 @media(max-width:520px){
   .hero-actions .button{width:100%}
   .section-heading h2,.hero h1{max-width:none}
+  .badge-upload-footer{align-items:stretch;flex-direction:column}
+  .badge-upload-actions{justify-content:stretch}
+  .badge-upload-actions .button,.certification-admin-actions .button{flex:1}
 }
 
 @media(prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
+  .certification-row:hover{transform:none}
+  .certification-badge-trigger:hover .certification-badge-frame{transform:none}
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
 }

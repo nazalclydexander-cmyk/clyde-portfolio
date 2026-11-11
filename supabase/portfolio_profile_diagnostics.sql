@@ -3,7 +3,18 @@ select
   table_name
 from information_schema.tables
 where table_schema = 'public'
-  and table_name in ('portfolio_profile', 'portfolio_profiles', 'profiles');
+  and table_name in ('admin_users', 'portfolio_profile', 'portfolio_profiles', 'profiles');
+
+select
+  proname,
+  prosecdef,
+  provolatile,
+  pg_get_functiondef(p.oid) as definition
+from pg_proc p
+join pg_namespace n
+  on n.oid = p.pronamespace
+where n.nspname = 'public'
+  and proname = 'is_portfolio_admin';
 
 select
   column_name,
@@ -20,9 +31,11 @@ select
   rowsecurity
 from pg_tables
 where schemaname = 'public'
-  and tablename = 'portfolio_profile';
+  and tablename in ('admin_users', 'portfolio_profile');
 
 select
+  schemaname,
+  tablename,
   policyname,
   permissive,
   roles,
@@ -31,7 +44,7 @@ select
   with_check
 from pg_policies
 where schemaname = 'public'
-  and tablename = 'portfolio_profile';
+  and tablename in ('admin_users', 'portfolio_profile');
 
 select
   id,
@@ -61,6 +74,8 @@ from storage.buckets
 where id = 'profile-images';
 
 select
+  schemaname,
+  tablename,
   policyname,
   permissive,
   roles,

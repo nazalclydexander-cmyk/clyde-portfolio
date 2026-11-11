@@ -1,0 +1,141 @@
+{
+  "version": 1,
+  "project": {
+    "name": "clyde-portfolio",
+    "productType": null,
+    "stack": [
+      "nextjs",
+      "react",
+      "tailwind-v4"
+    ]
+  },
+  "sources": {
+    "tokens": [
+      "src/app/globals.css"
+    ],
+    "components": [],
+    "assets": [],
+    "instructions": [
+      "AGENTS.md",
+      "CLAUDE.md"
+    ]
+  },
+  "design": {
+    "colorMode": "light",
+    "colors": {
+      "--bg-muted": {
+        "value": "#131619",
+        "source": "src/app/globals.css"
+      },
+      "--paper-muted": {
+        "value": "#d9d2c7",
+        "source": "src/app/globals.css"
+      },
+      "--muted": {
+        "value": "#a8b0b8",
+        "source": "src/app/globals.css"
+      },
+      "--muted-strong": {
+        "value": "#c3cad0",
+        "source": "src/app/globals.css"
+      },
+      "--accent": {
+        "value": "#8bb7dd",
+        "source": "src/app/globals.css"
+      },
+      "--accent-strong": {
+        "value": "#b5d5ef",
+        "source": "src/app/globals.css"
+      },
+      "--accent-ink": {
+        "value": "#07131d",
+        "source": "src/app/globals.css"
+      },
+      "--color-background": {
+        "value": "var(--bg)",
+        "source": "src/app/globals.css"
+      },
+      "--color-foreground": {
+        "value": "var(--ink)",
+        "source": "src/app/globals.css"
+      }
+    },
+    "typography": {
+      "--font-ui": {
+        "value": "var(--font-body),\"Segoe UI\",sans-serif",
+        "source": "src/app/globals.css"
+      },
+      "--font-code": {
+        "value": "var(--font-code-face),\"SFMono-Regular\",Consolas,monospace",
+        "source": "src/app/globals.css"
+      },
+      "--font-sans": {
+        "value": "var(--font-ui)",
+        "source": "src/app/globals.css"
+      },
+      "--font-mono": {
+        "value": "var(--font-code)",
+        "source": "src/app/globals.css"
+      }
+    },
+    "spacing": {},
+    "radius": {
+      "--radius-lg": {
+        "value": "18px",
+        "source": "src/app/globals.css"
+      },
+      "--radius-md": {
+        "value": "12px",
+        "source": "src/app/globals.css"
+      },
+      "--radius-sm": {
+        "value": "8px",
+        "source": "src/app/globals.css"
+      }
+    },
+    "shadows": {},
+    "motion": {},
+    "density": "unknown"
+  },
+  "components": {
+    "installed": [],
+    "preferredPrimitives": [],
+    "patterns": []
+  },
+  "constraints": {
+    "must": [],
+    "avoid": []
+  },
+  "decisions": [],
+  "evidence": [
+    {
+      "fact": "design.colorMode:light",
+      "source": "src/app/globals.css"
+    },
+    {
+      "fact": "design.tokens",
+      "source": "src/app/globals.css"
+    },
+    {
+      "fact": "project.instructions",
+      "source": "AGENTS.md"
+    },
+    {
+      "fact": "project.instructions",
+      "source": "CLAUDE.md"
+    },
+    {
+      "fact": "project.stack:nextjs",
+      "source": "package.json"
+    },
+    {
+      "fact": "project.stack:react",
+      "source": "package.json"
+    },
+    {
+      "fact": "project.stack:tailwind-v4",
+      "source": "package.json"
+    }
+  ],
+  "generatedAt": "2026-11-11T04:07:46.364Z"
+}

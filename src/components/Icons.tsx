@@ -83,6 +83,10 @@ export function UploadIcon(props: IconProps) {
   return <Icon {...props}><path d="M12 16V4M7 9l5-5 5 5M5 20h14" /></Icon>;
 }
 
+export function BadgeIcon(props: IconProps) {
+  return <Icon {...props}><circle cx="12" cy="9" r="5.5" /><path d="m8.5 13.5-1 7 4.5-2.5 4.5 2.5-1-7M9.5 9h5M12 6.5v5" /></Icon>;
+}
+
 export function ProfileIcon(props: IconProps) {
   return <Icon {...props}><rect x="4" y="3.5" width="16" height="17" rx="2" /><circle cx="12" cy="9" r="2.5" /><path d="M7.5 17c1.5-2 3-3 4.5-3s3 .9 4.5 3" /></Icon>;
 }

@@ -4,13 +4,14 @@ import type { ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { ExternalLinkIcon, FolderIcon, GridIcon, LogOutIcon, MailIcon, ProfileIcon, ToolIcon } from "@/components/Icons";
+import { BadgeIcon, ExternalLinkIcon, FolderIcon, GridIcon, LogOutIcon, MailIcon, ProfileIcon, ToolIcon } from "@/components/Icons";
 
 const navigation = [
   { href: "/admin", label: "Dashboard", icon: GridIcon },
   { href: "/admin/profile", label: "Profile", icon: ProfileIcon },
   { href: "/admin/projects", label: "Projects", icon: FolderIcon },
   { href: "/admin/skills", label: "Skills", icon: ToolIcon },
+  { href: "/admin/certifications", label: "Certifications", icon: BadgeIcon },
   { href: "/admin/messages", label: "Messages", icon: MailIcon },
 ];
 

@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element -- Dynamic Supabase image URLs are rendered without Next image loader assumptions. */
 import ContactForm from "@/components/ContactForm";
+import CertificationBadgeLightbox from "@/components/CertificationBadgeLightbox";
 import DirectionalPortrait from "@/components/DirectionalPortrait";
 import { ArrowUpRightIcon, GithubIcon } from "@/components/Icons";
 import PublicNavbar from "@/components/PublicNavbar";
@@ -236,8 +237,8 @@ function CertificationRow({ certification }: { certification: Certification }) {
   const statusLabel = certification.status === "active" ? "Active" : certification.status === "expired" ? "Expired" : "Pending verification";
 
   return (
-    <article className="certification-row">
-      {certification.badgeUrl ? <img className="certification-badge" src={certification.badgeUrl} alt={`${certification.name} badge`} /> : null}
+    <article className={`certification-row${certification.badgeUrl ? " has-badge" : ""}`}>
+      {certification.badgeUrl ? <CertificationBadgeLightbox src={certification.badgeUrl} alt={`${certification.name} badge`} name={certification.name} /> : null}
       <div className="certification-main">
         <div className="certification-title-row">
           <h3>{certification.name}</h3>
