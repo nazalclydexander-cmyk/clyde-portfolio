@@ -28,6 +28,7 @@ type Certification = {
 type FormState = Omit<Certification, "id" | "badge_url">;
 
 const MAX_BADGE_SIZE = 5 * 1024 * 1024;
+const BADGE_BUCKET = "certification-badges";
 const ALLOWED_BADGE_TYPES = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"];
 const ALLOWED_BADGE_EXTENSIONS = ["png", "jpg", "jpeg", "webp", "svg"];
 const BADGE_CONTENT_TYPES: Record<string, string> = {
@@ -71,6 +72,27 @@ function validateBadgeFile(file: File) {
 function getBadgeContentType(file: File) {
   const extension = file.name.split(".").pop()?.toLowerCase() || "";
   return file.type || BADGE_CONTENT_TYPES[extension] || "application/octet-stream";
+}
+
+function getBadgeStoragePath(badgeUrl: string | null | undefined) {
+  if (!badgeUrl) return null;
+
+  try {
+    const url = new URL(badgeUrl);
+    const prefix = `/storage/v1/object/public/${BADGE_BUCKET}/`;
+    if (!url.pathname.startsWith(prefix)) return null;
+    return decodeURIComponent(url.pathname.slice(prefix.length));
+  } catch {
+    return null;
+  }
+}
+
+async function removeBadgeFile(badgeUrl: string | null | undefined) {
+  const path = getBadgeStoragePath(badgeUrl);
+  if (!path) return;
+
+  const { error } = await supabase.storage.from(BADGE_BUCKET).remove([path]);
+  if (error) throw error;
 }
 
 function formatCertificationDate(value: string | null) {
@@ -246,7 +268,9 @@ export default function ManageCertifications() {
         throw new Error("Name, issuer, and issue date are required.");
       }
 
-      let badgeUrl = currentEditingId && !badgeRemoved ? items.find((item) => item.id === currentEditingId)?.badge_url || null : null;
+      const previousBadgeUrl = currentEditingId ? items.find((item) => item.id === currentEditingId)?.badge_url || null : null;
+      let badgeUrl = currentEditingId && !badgeRemoved ? previousBadgeUrl : null;
+      let uploadedBadgePath = "";
 
       if (selectedBadge) {
         const validationError = validateBadgeFile(selectedBadge);
@@ -254,14 +278,15 @@ export default function ManageCertifications() {
 
         const extension = selectedBadge.name.split(".").pop()?.toLowerCase() || "bin";
         const filePath = `certifications/${crypto.randomUUID()}.${extension}`;
-        const upload = await supabase.storage.from("certification-badges").upload(filePath, selectedBadge, {
+        const upload = await supabase.storage.from(BADGE_BUCKET).upload(filePath, selectedBadge, {
           cacheControl: "3600",
           upsert: false,
           contentType: getBadgeContentType(selectedBadge),
         });
 
         if (upload.error) throw upload.error;
-        badgeUrl = supabase.storage.from("certification-badges").getPublicUrl(filePath).data.publicUrl;
+        uploadedBadgePath = filePath;
+        badgeUrl = supabase.storage.from(BADGE_BUCKET).getPublicUrl(filePath).data.publicUrl;
       }
 
       const payload = {
@@ -280,11 +305,25 @@ export default function ManageCertifications() {
         ? await supabase.from("certifications").update(payload).eq("id", currentEditingId)
         : await supabase.from("certifications").insert(payload);
 
-      if (result.error) throw result.error;
+      if (result.error) {
+        if (uploadedBadgePath) {
+          await supabase.storage.from(BADGE_BUCKET).remove([uploadedBadgePath]);
+        }
+        throw result.error;
+      }
+
+      let cleanupWarning = "";
+      if (previousBadgeUrl && (selectedBadge || badgeRemoved)) {
+        try {
+          await removeBadgeFile(previousBadgeUrl);
+        } catch {
+          cleanupWarning = "Certification saved, but the previous badge file could not be removed.";
+        }
+      }
 
       const nextItems = await loadCertifications();
       resetForm(nextItems);
-      setSuccess(currentEditingId ? "Certification updated." : "Certification added.");
+      setSuccess(cleanupWarning || (currentEditingId ? "Certification updated." : "Certification added."));
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : "Could not save certification.");
     } finally {
@@ -301,8 +340,15 @@ export default function ManageCertifications() {
       return;
     }
 
-    setSuccess("Certification deleted.");
+    let cleanupWarning = "";
+    try {
+      await removeBadgeFile(item.badge_url);
+    } catch {
+      cleanupWarning = "Certification deleted, but its badge file could not be removed.";
+    }
+
     await loadCertifications();
+    setSuccess(cleanupWarning || "Certification deleted.");
   }
 
   if (loading) return <main className="loading-screen">Loading certifications…</main>;

@@ -82,7 +82,6 @@ export default async function Home() {
   const heroBio = portfolioProfile?.short_bio?.trim() || "I help teams solve operational problems with reliable systems, practical support, and web tools that are clear enough to maintain.";
   const heroLocation = portfolioProfile?.location?.trim() || "";
   const hasPortrait = Boolean(portfolioProfile?.profile_image_url);
-  const showCertificationsInNav = certifications.length >= 3;
   const groupedSkills = portfolioSkills.reduce<Record<string, Skill[]>>((groups, skill) => {
     const category = skill.category?.trim() || "Other";
     (groups[category] ||= []).push(skill);
@@ -92,7 +91,7 @@ export default async function Home() {
   return (
     <main id="top" className="portfolio-shell">
       <a className="skip-link" href="#hero-title">Skip to main content</a>
-      <PublicNavbar displayName={heroName} githubUrl={githubUrl} showCertifications={showCertificationsInNav} />
+      <PublicNavbar displayName={heroName} githubUrl={githubUrl} />
 
       <section className="hero" aria-labelledby="hero-title">
         <div className="site-container hero-inner">

@@ -6,13 +6,13 @@ import { CloseIcon, GithubIcon, MenuIcon } from "@/components/Icons";
 const links = [
   { href: "#about", label: "About" },
   { href: "#skills", label: "Capabilities" },
+  { href: "#certifications", label: "Certifications" },
   { href: "#projects", label: "Work" },
   { href: "#contact", label: "Contact" },
 ];
 
-export default function PublicNavbar({ displayName, githubUrl, showCertifications = false }: { displayName: string; githubUrl?: string; showCertifications?: boolean }) {
+export default function PublicNavbar({ displayName, githubUrl }: { displayName: string; githubUrl?: string }) {
   const [open, setOpen] = useState(false);
-  const navigationLinks = showCertifications ? [links[0], links[1], { href: "#certifications", label: "Certifications" }, links[2], links[3]] : links;
 
   return (
     <header className="site-header">
@@ -25,7 +25,7 @@ export default function PublicNavbar({ displayName, githubUrl, showCertification
         </a>
 
         <nav className="desktop-nav" aria-label="Primary navigation">
-          {navigationLinks.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
+          {links.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
         </nav>
 
         <div className="nav-actions">
@@ -42,7 +42,7 @@ export default function PublicNavbar({ displayName, githubUrl, showCertification
       {open && (
         <nav id="mobile-navigation" className="mobile-nav" aria-label="Mobile navigation">
           <div className="site-container">
-            {navigationLinks.map((link) => <a key={link.href} href={link.href} onClick={() => setOpen(false)}>{link.label}</a>)}
+            {links.map((link) => <a key={link.href} href={link.href} onClick={() => setOpen(false)}>{link.label}</a>)}
             {githubUrl && <a href={githubUrl} target="_blank" rel="noopener noreferrer">GitHub</a>}
           </div>
         </nav>

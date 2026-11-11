@@ -7,6 +7,29 @@ create table if not exists public.certifications (
   sort_order integer not null default 1, created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now())
 );
+
+create index if not exists certifications_sort_order_idx
+on public.certifications (sort_order asc, created_at asc, id asc);
+
+create index if not exists certifications_status_idx
+on public.certifications (status);
+
+create or replace function public.set_certifications_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = timezone('utc', now());
+  return new;
+end;
+$$;
+
+drop trigger if exists certifications_set_updated_at on public.certifications;
+create trigger certifications_set_updated_at
+before update on public.certifications
+for each row
+execute function public.set_certifications_updated_at();
+
 alter table public.certifications enable row level security;
 drop policy if exists "Public can view certifications" on public.certifications;
 create policy "Public can view certifications" on public.certifications for select using (true);
