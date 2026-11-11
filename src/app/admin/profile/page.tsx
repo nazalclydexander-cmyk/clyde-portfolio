@@ -3,7 +3,7 @@
 
 import { ChangeEvent, FormEvent, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getProfileTableErrorMessage, PORTFOLIO_PROFILE_ADMIN_SELECT, PORTFOLIO_PROFILE_TABLE, type PortfolioProfileAdmin } from "@/lib/portfolioProfile";
+import { getProfileTableErrorMessage, isMissingPortraitInteractionColumnError, PORTFOLIO_PROFILE_ADMIN_SELECT, PORTFOLIO_PROFILE_ADMIN_SELECT_FALLBACK, PORTFOLIO_PROFILE_TABLE, type PortfolioProfileAdmin } from "@/lib/portfolioProfile";
 import { supabase } from "@/lib/supabase";
 import AdminShell, { AdminNotice } from "@/components/AdminShell";
 import { ProfileIcon, TrashIcon, UploadIcon } from "@/components/Icons";
@@ -24,6 +24,11 @@ type ProfileForm = {
   portrait_interaction_enabled: boolean;
 };
 
+type ProfileSaveResult = {
+  data: unknown;
+  error: { message?: string | null; code?: string | null; details?: string | null; hint?: string | null } | null;
+};
+
 const emptyForm: ProfileForm = {
   display_name: "",
   headline: "",
@@ -42,6 +47,17 @@ const emptyForm: ProfileForm = {
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp"];
+
+async function loadAdminProfileRecord() {
+  const profileQuery = await supabase.from(PORTFOLIO_PROFILE_TABLE).select(PORTFOLIO_PROFILE_ADMIN_SELECT).eq("singleton", true).maybeSingle();
+  if (!isMissingPortraitInteractionColumnError(profileQuery.error)) return profileQuery;
+
+  const fallbackQuery = await supabase.from(PORTFOLIO_PROFILE_TABLE).select(PORTFOLIO_PROFILE_ADMIN_SELECT_FALLBACK).eq("singleton", true).maybeSingle();
+  return {
+    data: fallbackQuery.data ? { ...fallbackQuery.data, portrait_interaction_enabled: true } : null,
+    error: fallbackQuery.error,
+  };
+}
 
 export default function AdminProfile() {
   const router = useRouter();
@@ -82,7 +98,7 @@ export default function AdminProfile() {
       return;
     }
 
-    const { data, error: loadError } = await supabase.from(PORTFOLIO_PROFILE_TABLE).select(PORTFOLIO_PROFILE_ADMIN_SELECT).eq("singleton", true).maybeSingle();
+    const { data, error: loadError } = await loadAdminProfileRecord();
     if (loadError) {
       setError(getProfileTableErrorMessage(loadError));
       setLoading(false);
@@ -103,7 +119,7 @@ export default function AdminProfile() {
         return;
       }
 
-      const { data, error: loadError } = await supabase.from(PORTFOLIO_PROFILE_TABLE).select(PORTFOLIO_PROFILE_ADMIN_SELECT).eq("singleton", true).maybeSingle();
+      const { data, error: loadError } = await loadAdminProfileRecord();
       if (!active) return;
 
       if (loadError) {
@@ -191,27 +207,36 @@ export default function AdminProfile() {
     profile_image_path?: string | null;
     updated_at?: string;
   }) {
-    if (profileId) {
-      const { data, error } = await supabase
+    async function save(select: string, nextPayload: typeof payload): Promise<ProfileSaveResult> {
+      if (profileId) {
+        const result = await supabase
+          .from(PORTFOLIO_PROFILE_TABLE)
+          .update(nextPayload)
+          .eq("id", profileId)
+          .select(select)
+          .single();
+        return { data: result.data, error: result.error };
+      }
+
+      const result = await supabase
         .from(PORTFOLIO_PROFILE_TABLE)
-        .update(payload)
-        .eq("id", profileId)
-        .select(PORTFOLIO_PROFILE_ADMIN_SELECT)
+        .insert({ singleton: true, ...nextPayload })
+        .select(select)
         .single();
-      if (error) throw error;
-      return data as PortfolioProfileAdmin;
+      return { data: result.data, error: result.error };
     }
 
-    const { data, error } = await supabase
-      .from(PORTFOLIO_PROFILE_TABLE)
-      .insert({
-        singleton: true,
-        ...payload,
-      })
-      .select(PORTFOLIO_PROFILE_ADMIN_SELECT)
-      .single();
-    if (error) throw error;
-    return data as PortfolioProfileAdmin;
+    const result = await save(PORTFOLIO_PROFILE_ADMIN_SELECT, payload);
+    if (!result.error) return result.data as PortfolioProfileAdmin;
+    if (!isMissingPortraitInteractionColumnError(result.error)) throw result.error;
+
+    const fallbackPayload = { ...payload };
+    delete fallbackPayload.portrait_interaction_enabled;
+    const fallbackResult = await save(PORTFOLIO_PROFILE_ADMIN_SELECT_FALLBACK, fallbackPayload);
+    if (fallbackResult.error) throw fallbackResult.error;
+
+    const fallbackData = fallbackResult.data as Record<string, unknown> | null;
+    return (fallbackData ? { ...fallbackData, portrait_interaction_enabled: payload.portrait_interaction_enabled ?? true } : fallbackData) as PortfolioProfileAdmin;
   }
 
   async function saveProfileImage() {

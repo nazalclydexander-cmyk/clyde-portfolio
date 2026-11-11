@@ -1,6 +1,6 @@
 export const PORTFOLIO_PROFILE_TABLE = "portfolio_profile";
 
-export const PORTFOLIO_PROFILE_PUBLIC_SELECT = `
+const PORTFOLIO_PROFILE_PUBLIC_SELECT_BASE = `
   id,
   singleton,
   display_name,
@@ -14,10 +14,12 @@ export const PORTFOLIO_PROFILE_PUBLIC_SELECT = `
   environment,
   builds,
   approach
-  ,portrait_interaction_enabled
 `;
 
-export const PORTFOLIO_PROFILE_ADMIN_SELECT = `
+export const PORTFOLIO_PROFILE_PUBLIC_SELECT = `${PORTFOLIO_PROFILE_PUBLIC_SELECT_BASE}, portrait_interaction_enabled`;
+export const PORTFOLIO_PROFILE_PUBLIC_SELECT_FALLBACK = PORTFOLIO_PROFILE_PUBLIC_SELECT_BASE;
+
+const PORTFOLIO_PROFILE_ADMIN_SELECT_BASE = `
   id,
   singleton,
   display_name,
@@ -34,6 +36,9 @@ export const PORTFOLIO_PROFILE_ADMIN_SELECT = `
   approach,
   updated_at
 `;
+
+export const PORTFOLIO_PROFILE_ADMIN_SELECT = `${PORTFOLIO_PROFILE_ADMIN_SELECT_BASE}, portrait_interaction_enabled`;
+export const PORTFOLIO_PROFILE_ADMIN_SELECT_FALLBACK = PORTFOLIO_PROFILE_ADMIN_SELECT_BASE;
 
 export type PortfolioProfilePublic = {
   id: string;
@@ -73,6 +78,19 @@ export function formatSupabaseError(error: SupabaseLikeError | null | undefined)
     details: error.details || null,
     hint: error.hint || null,
   };
+}
+
+export function isMissingPortraitInteractionColumnError(error: SupabaseLikeError | null | undefined) {
+  const details = formatSupabaseError(error);
+  if (!details) return false;
+
+  const message = `${details.message} ${details.details || ""}`.toLowerCase();
+  return message.includes("portrait_interaction_enabled") && (
+    details.code === "42703" ||
+    details.code === "PGRST204" ||
+    message.includes("does not exist") ||
+    message.includes("schema cache")
+  );
 }
 
 export function getProfileTableErrorMessage(error: SupabaseLikeError | null | undefined) {

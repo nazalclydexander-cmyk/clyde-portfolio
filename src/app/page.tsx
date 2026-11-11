@@ -6,7 +6,7 @@ import { ArrowUpRightIcon, GithubIcon } from "@/components/Icons";
 import PublicNavbar from "@/components/PublicNavbar";
 import type { Certification } from "@/lib/certifications";
 import { directionalPortraitSources } from "@/lib/portraitAssets";
-import { formatSupabaseError, PORTFOLIO_PROFILE_PUBLIC_SELECT, PORTFOLIO_PROFILE_TABLE, type PortfolioProfilePublic } from "@/lib/portfolioProfile";
+import { formatSupabaseError, isMissingPortraitInteractionColumnError, PORTFOLIO_PROFILE_PUBLIC_SELECT, PORTFOLIO_PROFILE_PUBLIC_SELECT_FALLBACK, PORTFOLIO_PROFILE_TABLE, type PortfolioProfilePublic } from "@/lib/portfolioProfile";
 import { supabase } from "@/lib/supabase";
 import { connection } from "next/server";
 
@@ -24,13 +24,24 @@ type Project = {
 
 type Skill = { id: string; name: string; category: string | null };
 
+async function loadPublicProfile() {
+  const profileQuery = await supabase.from(PORTFOLIO_PROFILE_TABLE).select(PORTFOLIO_PROFILE_PUBLIC_SELECT).eq("singleton", true).maybeSingle();
+  if (!isMissingPortraitInteractionColumnError(profileQuery.error)) return profileQuery;
+
+  const fallbackQuery = await supabase.from(PORTFOLIO_PROFILE_TABLE).select(PORTFOLIO_PROFILE_PUBLIC_SELECT_FALLBACK).eq("singleton", true).maybeSingle();
+  return {
+    data: fallbackQuery.data ? { ...fallbackQuery.data, portrait_interaction_enabled: true } : null,
+    error: fallbackQuery.error,
+  };
+}
+
 export default async function Home() {
   await connection();
 
   const [{ data: projects, error: projectsError }, { data: skills, error: skillsError }, { data: profile, error: profileError }, { data: certificationRows, error: certificationsError }] = await Promise.all([
     supabase.from("projects").select("*").eq("status", "published").order("sort_order", { ascending: true }),
     supabase.from("skills").select("*").order("sort_order", { ascending: true }),
-    supabase.from(PORTFOLIO_PROFILE_TABLE).select(PORTFOLIO_PROFILE_PUBLIC_SELECT).eq("singleton", true).maybeSingle(),
+    loadPublicProfile(),
     supabase.from("certifications").select("*").order("sort_order", { ascending: true }),
   ]);
 
