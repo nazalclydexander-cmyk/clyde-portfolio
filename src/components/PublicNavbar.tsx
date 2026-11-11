@@ -10,8 +10,9 @@ const links = [
   { href: "#contact", label: "Contact" },
 ];
 
-export default function PublicNavbar({ displayName, githubUrl }: { displayName: string; githubUrl?: string }) {
+export default function PublicNavbar({ displayName, githubUrl, showCertifications = false }: { displayName: string; githubUrl?: string; showCertifications?: boolean }) {
   const [open, setOpen] = useState(false);
+  const navigationLinks = showCertifications ? [links[0], links[1], { href: "#certifications", label: "Certifications" }, links[2], links[3]] : links;
 
   return (
     <header className="site-header">
@@ -24,7 +25,7 @@ export default function PublicNavbar({ displayName, githubUrl }: { displayName: 
         </a>
 
         <nav className="desktop-nav" aria-label="Primary navigation">
-          {links.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
+          {navigationLinks.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
         </nav>
 
         <div className="nav-actions">
@@ -41,7 +42,7 @@ export default function PublicNavbar({ displayName, githubUrl }: { displayName: 
       {open && (
         <nav id="mobile-navigation" className="mobile-nav" aria-label="Mobile navigation">
           <div className="site-container">
-            {links.map((link) => <a key={link.href} href={link.href} onClick={() => setOpen(false)}>{link.label}</a>)}
+            {navigationLinks.map((link) => <a key={link.href} href={link.href} onClick={() => setOpen(false)}>{link.label}</a>)}
             {githubUrl && <a href={githubUrl} target="_blank" rel="noopener noreferrer">GitHub</a>}
           </div>
         </nav>
