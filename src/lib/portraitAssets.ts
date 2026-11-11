@@ -18,8 +18,7 @@ export type DirectionalPortraitSources = Partial<Record<PortraitDirection, strin
  */
 export const directionalPortraitSources: DirectionalPortraitSources = {
   neutral: "/images/portrait-directional/portrait-neutral.png",
-  // The generated horizontal set did not contain a screen-left gaze. The missing
-  // state is supplied by the lossless, full-resolution flipped asset below.
+  // Dedicated screen-left gaze asset; kept separate from the original generated set.
   left: "/images/portrait-directional/portrait-left-screen.png",
   right: "/images/portrait-directional/portrait-left.png",
   up: "/images/portrait-directional/portrait-up.png",
