@@ -1,7 +1,10 @@
 /* eslint-disable @next/next/no-img-element -- Dynamic Supabase image URLs are rendered without Next image loader assumptions. */
 import ContactForm from "@/components/ContactForm";
+import DirectionalPortrait from "@/components/DirectionalPortrait";
 import { ArrowUpRightIcon, GithubIcon } from "@/components/Icons";
 import PublicNavbar from "@/components/PublicNavbar";
+import { certifications, type Certification } from "@/lib/certifications";
+import { directionalPortraitSources } from "@/lib/portraitAssets";
 import { formatSupabaseError, PORTFOLIO_PROFILE_PUBLIC_SELECT, PORTFOLIO_PROFILE_TABLE, type PortfolioProfilePublic } from "@/lib/portfolioProfile";
 import { supabase } from "@/lib/supabase";
 import { connection } from "next/server";
@@ -54,6 +57,7 @@ export default async function Home() {
   const heroBio = portfolioProfile?.short_bio?.trim() || "I help teams solve operational problems with reliable systems, practical support, and web tools that are clear enough to maintain.";
   const heroLocation = portfolioProfile?.location?.trim() || "";
   const hasPortrait = Boolean(portfolioProfile?.profile_image_url);
+  const showCertificationsInNav = certifications.length >= 3;
   const groupedSkills = portfolioSkills.reduce<Record<string, Skill[]>>((groups, skill) => {
     const category = skill.category?.trim() || "Other";
     (groups[category] ||= []).push(skill);
@@ -63,7 +67,7 @@ export default async function Home() {
   return (
     <main id="top" className="portfolio-shell">
       <a className="skip-link" href="#hero-title">Skip to main content</a>
-      <PublicNavbar displayName={heroName} githubUrl={githubUrl} />
+      <PublicNavbar displayName={heroName} githubUrl={githubUrl} showCertifications={showCertificationsInNav} />
 
       <section className="hero" aria-labelledby="hero-title">
         <div className="site-container hero-inner">
@@ -80,10 +84,12 @@ export default async function Home() {
 
           <div className="hero-side-column">
             {hasPortrait ? (
-              <figure className="hero-portrait">
-                <img src={portfolioProfile?.profile_image_url || ""} alt={`${heroName} profile portrait`} width={640} height={800} fetchPriority="high" />
-                <figcaption>{heroName}</figcaption>
-              </figure>
+              <DirectionalPortrait
+                neutralSrc={portfolioProfile?.profile_image_url || ""}
+                alt={`${heroName} profile portrait`}
+                caption={heroName}
+                sources={directionalPortraitSources}
+              />
             ) : (
               <div className="hero-monogram" aria-label={heroName}>
                 <strong>{heroName}</strong>
@@ -131,6 +137,8 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      <CertificationsSection />
 
       <section id="projects" className="section section-muted">
         <div className="site-container">
@@ -190,6 +198,73 @@ export default async function Home() {
       </footer>
     </main>
   );
+}
+
+function CertificationsSection() {
+  return (
+    <section id="certifications" className="section">
+      <div className="site-container section-grid">
+        <div className="section-heading">
+          <h2>Certifications that support the work.</h2>
+          <p>Verified credentials will be listed here with their issuing organization and verification details.</p>
+        </div>
+
+        <div className="certifications-list">
+          {certifications.length ? certifications.map((certification) => <CertificationRow key={certification.id} certification={certification} />) : (
+            <p className="empty-state certification-empty">No verified certifications added yet.</p>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CertificationRow({ certification }: { certification: Certification }) {
+  const statusLabel = certification.status === "active" ? "Active" : certification.status === "expired" ? "Expired" : "Pending verification";
+
+  return (
+    <article className="certification-row">
+      <div className="certification-main">
+        <div className="certification-title-row">
+          <h3>{certification.name}</h3>
+          <span className={`status-badge certification-status-${certification.status}`}>{statusLabel}</span>
+        </div>
+        <p>{certification.issuer}</p>
+      </div>
+
+      <dl className="certification-meta">
+        <div>
+          <dt>Issued</dt>
+          <dd>{formatCertificationDate(certification.issueDate)}</dd>
+        </div>
+        {certification.expirationDate ? (
+          <div>
+            <dt>Expires</dt>
+            <dd>{formatCertificationDate(certification.expirationDate)}</dd>
+          </div>
+        ) : null}
+        {certification.credentialId ? (
+          <div>
+            <dt>Credential ID</dt>
+            <dd>{certification.credentialId}</dd>
+          </div>
+        ) : null}
+      </dl>
+
+      {certification.verificationUrl ? (
+        <a className="certification-link" href={certification.verificationUrl} target="_blank" rel="noopener noreferrer">
+          Verify credential
+          <ArrowUpRightIcon className="icon-sm" />
+        </a>
+      ) : null}
+    </article>
+  );
+}
+
+function formatCertificationDate(value: string) {
+  const date = new Date(`${value}T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("en", { month: "short", year: "numeric", timeZone: "UTC" }).format(date);
 }
 
 function buildFooterSubtitle(profile: PortfolioProfilePublic | null) {
