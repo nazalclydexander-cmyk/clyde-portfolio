@@ -23,14 +23,10 @@ const NON_NEUTRAL_DIRECTIONS = PORTRAIT_DIRECTIONS.filter(
 );
 
 const POINTER_DIRECTIONS: Record<number, Exclude<PortraitDirection, "neutral">> = {
-  0: "right",
-  45: "down-right",
-  90: "down",
-  135: "down-left",
-  180: "left",
-  225: "up-left",
-  270: "up",
-  315: "up-right",
+  0: "right", 22.5: "angle-22", 45: "down-right", 67.5: "angle-68",
+  90: "down", 112.5: "angle-112", 135: "down-left", 157.5: "angle-158",
+  180: "left", 202.5: "angle-202", 225: "up-left", 247.5: "angle-248",
+  270: "up", 292.5: "angle-292", 315: "up-right", 337.5: "angle-338",
 };
 
 const INTERACTION_PADDING = 112;
@@ -79,7 +75,7 @@ export default function DirectionalPortrait({ neutralSrc, alt, caption, sources 
       return;
     }
 
-    const angle = Math.round((Math.atan2(y, x) * 180) / Math.PI / 45) * 45;
+    const angle = Math.round((Math.atan2(y, x) * 180) / Math.PI / 22.5) * 22.5;
     const normalizedAngle = (angle + 360) % 360;
     setDirection(POINTER_DIRECTIONS[normalizedAngle] || "neutral");
   }, [isInteractive]);
