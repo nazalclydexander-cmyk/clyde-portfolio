@@ -28,7 +28,7 @@ export const directionalPortraitSources: DirectionalPortraitSources = {
   neutral: "/images/portrait-directional/portrait-neutral.png",
   // Dedicated screen-left gaze asset; kept separate from the original generated set.
   left: "/images/portrait-directional/portrait-left-screen.png",
-  right: "/images/portrait-directional/portrait-left.png",
+  right: "/images/portrait-directional/portrait-right.png",
   up: "/images/portrait-directional/portrait-up.png",
   down: "/images/portrait-directional/portrait-down.png",
   "up-left": "/images/portrait-directional/portrait-up-left.png",
