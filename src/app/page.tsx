@@ -3,7 +3,7 @@ import ContactForm from "@/components/ContactForm";
 import DirectionalPortrait from "@/components/DirectionalPortrait";
 import { ArrowUpRightIcon, GithubIcon } from "@/components/Icons";
 import PublicNavbar from "@/components/PublicNavbar";
-import { certifications, type Certification } from "@/lib/certifications";
+import type { Certification } from "@/lib/certifications";
 import { directionalPortraitSources } from "@/lib/portraitAssets";
 import { formatSupabaseError, PORTFOLIO_PROFILE_PUBLIC_SELECT, PORTFOLIO_PROFILE_TABLE, type PortfolioProfilePublic } from "@/lib/portfolioProfile";
 import { supabase } from "@/lib/supabase";
@@ -26,10 +26,11 @@ type Skill = { id: string; name: string; category: string | null };
 export default async function Home() {
   await connection();
 
-  const [{ data: projects, error: projectsError }, { data: skills, error: skillsError }, { data: profile, error: profileError }] = await Promise.all([
+  const [{ data: projects, error: projectsError }, { data: skills, error: skillsError }, { data: profile, error: profileError }, { data: certificationRows, error: certificationsError }] = await Promise.all([
     supabase.from("projects").select("*").eq("status", "published").order("sort_order", { ascending: true }),
     supabase.from("skills").select("*").order("sort_order", { ascending: true }),
     supabase.from(PORTFOLIO_PROFILE_TABLE).select(PORTFOLIO_PROFILE_PUBLIC_SELECT).eq("singleton", true).maybeSingle(),
+    supabase.from("certifications").select("*").order("sort_order", { ascending: true }),
   ]);
 
   if (projectsError) console.error("Projects error:", projectsError);
@@ -44,10 +45,22 @@ export default async function Home() {
     console.error("hint:", formattedProfileError?.hint ?? null);
     console.error("name:", profileError.name ?? null);
   }
+  if (certificationsError) console.error("Certifications error:", certificationsError);
 
   const portfolioProjects = (projects || []) as Project[];
   const portfolioSkills = (skills || []) as Skill[];
   const portfolioProfile = (profile || null) as PortfolioProfilePublic | null;
+  const certifications = (certificationRows || []).map((row) => ({
+    id: row.id,
+    name: row.name,
+    issuer: row.issuer,
+    issueDate: row.issue_date,
+    expirationDate: row.expiration_date,
+    credentialId: row.credential_id,
+    verificationUrl: row.verification_url,
+    badgeUrl: row.badge_url,
+    status: row.status,
+  })) as Certification[];
   const featuredProject = portfolioProjects.find((project) => project.featured) || portfolioProjects[0] || null;
   const additionalProjects = featuredProject ? portfolioProjects.filter((project) => project.id !== featuredProject.id) : [];
   const githubUrl = portfolioProfile?.github_url || portfolioProjects.find((project) => project.github_url)?.github_url || undefined;
@@ -138,7 +151,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <CertificationsSection />
+      <CertificationsSection certifications={certifications} />
 
       <section id="projects" className="section section-muted">
         <div className="site-container">
@@ -200,7 +213,7 @@ export default async function Home() {
   );
 }
 
-function CertificationsSection() {
+function CertificationsSection({ certifications }: { certifications: Certification[] }) {
   return (
     <section id="certifications" className="section">
       <div className="site-container section-grid">
@@ -224,6 +237,7 @@ function CertificationRow({ certification }: { certification: Certification }) {
 
   return (
     <article className="certification-row">
+      {certification.badgeUrl ? <img className="certification-badge" src={certification.badgeUrl} alt={`${certification.name} badge`} /> : null}
       <div className="certification-main">
         <div className="certification-title-row">
           <h3>{certification.name}</h3>

@@ -9,6 +9,8 @@ export type Certification = {
   credentialId?: string | null;
   verificationUrl?: string | null;
   status: CertificationStatus;
+  badgeUrl?: string | null;
+  sort_order?: number;
 };
 
 /**

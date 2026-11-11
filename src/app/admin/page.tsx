@@ -53,6 +53,7 @@ export default function AdminDashboard() {
           <ManagementLink href="/admin/profile" title="Manage profile" description="Update the hero copy, metadata, and professional portrait." />
           <ManagementLink href="/admin/projects" title="Manage projects" description="Create, edit, publish, and order project work." />
           <ManagementLink href="/admin/skills" title="Manage skills" description="Organize the capabilities shown on the portfolio." />
+          <ManagementLink href="/admin/certifications" title="Manage certifications" description="Add verified credentials and upload badge images." />
           <ManagementLink href="/admin/messages" title="Review messages" description="Read and respond to portfolio enquiries." />
         </div>
       </section>
