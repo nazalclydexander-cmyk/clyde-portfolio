@@ -21,6 +21,7 @@ type ProfileForm = {
   approach: string;
   profile_image_url: string;
   profile_image_path: string;
+  portrait_interaction_enabled: boolean;
 };
 
 const emptyForm: ProfileForm = {
@@ -36,6 +37,7 @@ const emptyForm: ProfileForm = {
   approach: "",
   profile_image_url: "",
   profile_image_path: "",
+  portrait_interaction_enabled: true,
 };
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024;
@@ -69,6 +71,7 @@ export default function AdminProfile() {
       approach: profile?.approach || "",
       profile_image_url: profile?.profile_image_url || "",
       profile_image_path: profile?.profile_image_path || "",
+      portrait_interaction_enabled: profile?.portrait_interaction_enabled ?? true,
     });
   }, []);
 
@@ -183,6 +186,7 @@ export default function AdminProfile() {
     environment?: string | null;
     builds?: string | null;
     approach?: string | null;
+    portrait_interaction_enabled?: boolean;
     profile_image_url?: string | null;
     profile_image_path?: string | null;
     updated_at?: string;
@@ -315,6 +319,7 @@ export default function AdminProfile() {
         environment: form.environment.trim() || null,
         builds: form.builds.trim() || null,
         approach: form.approach.trim() || null,
+        portrait_interaction_enabled: form.portrait_interaction_enabled,
         profile_image_url: profileImageUrl,
         profile_image_path: profileImagePath,
         updated_at: new Date().toISOString(),
@@ -397,6 +402,7 @@ export default function AdminProfile() {
               <Field label="Environment" id="profile-environment"><input id="profile-environment" value={form.environment} onChange={(event) => update("environment", event.target.value)} placeholder="Cloud and infrastructure" /></Field>
               <Field label="Builds" id="profile-builds"><input id="profile-builds" value={form.builds} onChange={(event) => update("builds", event.target.value)} placeholder="Modern web systems" /></Field>
               <Field label="Approach" id="profile-approach"><input id="profile-approach" value={form.approach} onChange={(event) => update("approach", event.target.value)} placeholder="Practical and reliable" /></Field>
+              <div className="field-full"><label className="checkbox-field"><input type="checkbox" checked={form.portrait_interaction_enabled} onChange={(event) => update("portrait_interaction_enabled", event.target.checked)} /> <span><strong>Enable interactive portrait</strong><small className="field-hint">Let the hero portrait react to pointer direction on desktop. Touch devices and reduced-motion users remain static.</small></span></label></div>
               <div className="field-full">
                 <button type="submit" disabled={saving} className="button">{saving ? "Saving…" : "Save profile"}</button>
               </div>

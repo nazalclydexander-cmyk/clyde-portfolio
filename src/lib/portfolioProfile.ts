@@ -14,6 +14,7 @@ export const PORTFOLIO_PROFILE_PUBLIC_SELECT = `
   environment,
   builds,
   approach
+  ,portrait_interaction_enabled
 `;
 
 export const PORTFOLIO_PROFILE_ADMIN_SELECT = `
@@ -48,6 +49,7 @@ export type PortfolioProfilePublic = {
   environment: string | null;
   builds: string | null;
   approach: string | null;
+  portrait_interaction_enabled?: boolean | null;
 };
 
 export type PortfolioProfileAdmin = PortfolioProfilePublic & {

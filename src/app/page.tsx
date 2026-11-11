@@ -103,6 +103,7 @@ export default async function Home() {
                 alt={`${heroName} profile portrait`}
                 caption={heroName}
                 sources={directionalPortraitSources}
+                enabled={portfolioProfile?.portrait_interaction_enabled ?? true}
               />
             ) : (
               <div className="hero-monogram" aria-label={heroName}>

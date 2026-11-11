@@ -15,6 +15,7 @@ type DirectionalPortraitProps = {
   alt: string;
   caption: string;
   sources?: DirectionalPortraitSources;
+  enabled?: boolean;
 };
 
 const NON_NEUTRAL_DIRECTIONS = PORTRAIT_DIRECTIONS.filter(
@@ -32,7 +33,7 @@ const POINTER_DIRECTIONS: Record<number, Exclude<PortraitDirection, "neutral">> 
   315: "up-right",
 };
 
-export default function DirectionalPortrait({ neutralSrc, alt, caption, sources = directionalPortraitSources }: DirectionalPortraitProps) {
+export default function DirectionalPortrait({ neutralSrc, alt, caption, sources = directionalPortraitSources, enabled = true }: DirectionalPortraitProps) {
   const [direction, setDirection] = useState<PortraitDirection>("neutral");
   const [failedDirections, setFailedDirections] = useState<Set<PortraitDirection>>(new Set());
   const [isPointerCapable, setIsPointerCapable] = useState(false);
@@ -46,7 +47,7 @@ export default function DirectionalPortrait({ neutralSrc, alt, caption, sources 
   );
 
   const visibleDirection = isPointerCapable && !prefersReducedMotion && direction !== "neutral" && sources[direction] && sources[direction] !== neutralSrc && !failedDirections.has(direction) ? direction : "neutral";
-  const isInteractive = isPointerCapable && !prefersReducedMotion;
+  const isInteractive = enabled && isPointerCapable && !prefersReducedMotion;
 
   useEffect(() => {
     const pointerQuery = window.matchMedia("(pointer: fine)");
