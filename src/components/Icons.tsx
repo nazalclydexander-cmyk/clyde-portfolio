@@ -31,6 +31,14 @@ export function GithubIcon(props: IconProps) {
   );
 }
 
+export function LinkedinIcon(props: IconProps) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M5.2 7.9H2.1V21h3.1V7.9ZM3.65 3A1.8 1.8 0 1 0 3.65 6.6 1.8 1.8 0 0 0 3.65 3ZM21.9 13.5c0-3.95-2.1-5.8-4.9-5.8-2.27 0-3.28 1.25-3.85 2.12V7.9h-3.1V21h3.1v-7.1c0-1.87.35-3.68 2.67-3.68 2.29 0 2.32 2.14 2.32 3.8V21h3.1l.01-7.5Z" />
+    </svg>
+  );
+}
+
 export function MenuIcon(props: IconProps) {
   return <Icon {...props}><path d="M4 7h16M4 12h16M4 17h16" /></Icon>;
 }

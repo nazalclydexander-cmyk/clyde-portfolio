@@ -3,7 +3,7 @@
 
 import { ChangeEvent, FormEvent, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getProfileTableErrorMessage, isMissingPortraitInteractionColumnError, PORTFOLIO_PROFILE_ADMIN_SELECT, PORTFOLIO_PROFILE_ADMIN_SELECT_FALLBACK, PORTFOLIO_PROFILE_TABLE, type PortfolioProfileAdmin } from "@/lib/portfolioProfile";
+import { getProfileTableErrorMessage, isMissingPortraitInteractionColumnError, PORTFOLIO_PROFILE_ADMIN_SELECT, PORTFOLIO_PROFILE_ADMIN_SELECT_FALLBACK, PORTFOLIO_PROFILE_ADMIN_SELECT_NO_PORTRAIT, PORTFOLIO_PROFILE_TABLE, type PortfolioProfileAdmin } from "@/lib/portfolioProfile";
 import { supabase } from "@/lib/supabase";
 import AdminShell, { AdminNotice } from "@/components/AdminShell";
 import { ProfileIcon, TrashIcon, UploadIcon } from "@/components/Icons";
@@ -14,6 +14,7 @@ type ProfileForm = {
   short_bio: string;
   availability_text: string;
   github_url: string;
+  linkedin_url: string;
   location: string;
   focus: string;
   environment: string;
@@ -35,6 +36,7 @@ const emptyForm: ProfileForm = {
   short_bio: "",
   availability_text: "",
   github_url: "",
+  linkedin_url: "",
   location: "",
   focus: "",
   environment: "",
@@ -52,9 +54,13 @@ async function loadAdminProfileRecord() {
   const profileQuery = await supabase.from(PORTFOLIO_PROFILE_TABLE).select(PORTFOLIO_PROFILE_ADMIN_SELECT).eq("singleton", true).maybeSingle();
   if (!isMissingPortraitInteractionColumnError(profileQuery.error)) return profileQuery;
 
-  const fallbackQuery = await supabase.from(PORTFOLIO_PROFILE_TABLE).select(PORTFOLIO_PROFILE_ADMIN_SELECT_FALLBACK).eq("singleton", true).maybeSingle();
+  const fallbackWithoutPortraitQuery = await supabase.from(PORTFOLIO_PROFILE_TABLE).select(PORTFOLIO_PROFILE_ADMIN_SELECT_NO_PORTRAIT).eq("singleton", true).maybeSingle();
+  const fallbackQuery = fallbackWithoutPortraitQuery.error
+    ? await supabase.from(PORTFOLIO_PROFILE_TABLE).select(PORTFOLIO_PROFILE_ADMIN_SELECT_FALLBACK).eq("singleton", true).maybeSingle()
+    : fallbackWithoutPortraitQuery;
+  const fallbackData = fallbackQuery.data as Record<string, unknown> | null;
   return {
-    data: fallbackQuery.data ? { ...fallbackQuery.data, portrait_interaction_enabled: true } : null,
+    data: fallbackData ? { ...fallbackData, linkedin_url: typeof fallbackData.linkedin_url === "string" ? fallbackData.linkedin_url : null, portrait_interaction_enabled: true } : null,
     error: fallbackQuery.error,
   };
 }
@@ -80,6 +86,7 @@ export default function AdminProfile() {
       short_bio: profile?.short_bio || "",
       availability_text: profile?.availability_text || "",
       github_url: profile?.github_url || "",
+      linkedin_url: profile?.linkedin_url || "",
       location: profile?.location || "",
       focus: profile?.focus || "",
       environment: profile?.environment || "",
@@ -197,6 +204,7 @@ export default function AdminProfile() {
     short_bio?: string | null;
     availability_text?: string | null;
     github_url?: string | null;
+    linkedin_url?: string | null;
     location?: string | null;
     focus?: string | null;
     environment?: string | null;
@@ -232,11 +240,18 @@ export default function AdminProfile() {
 
     const fallbackPayload = { ...payload };
     delete fallbackPayload.portrait_interaction_enabled;
+    const fallbackWithoutPortraitResult = await save(PORTFOLIO_PROFILE_ADMIN_SELECT_NO_PORTRAIT, fallbackPayload);
+    if (!fallbackWithoutPortraitResult.error) {
+      const fallbackData = fallbackWithoutPortraitResult.data as Record<string, unknown> | null;
+      return (fallbackData ? { ...fallbackData, portrait_interaction_enabled: payload.portrait_interaction_enabled ?? true } : fallbackData) as PortfolioProfileAdmin;
+    }
+
+    delete fallbackPayload.linkedin_url;
     const fallbackResult = await save(PORTFOLIO_PROFILE_ADMIN_SELECT_FALLBACK, fallbackPayload);
     if (fallbackResult.error) throw fallbackResult.error;
 
     const fallbackData = fallbackResult.data as Record<string, unknown> | null;
-    return (fallbackData ? { ...fallbackData, portrait_interaction_enabled: payload.portrait_interaction_enabled ?? true } : fallbackData) as PortfolioProfileAdmin;
+    return (fallbackData ? { ...fallbackData, linkedin_url: null, portrait_interaction_enabled: payload.portrait_interaction_enabled ?? true } : fallbackData) as PortfolioProfileAdmin;
   }
 
   async function saveProfileImage() {
@@ -339,6 +354,7 @@ export default function AdminProfile() {
         short_bio: form.short_bio.trim() || null,
         availability_text: form.availability_text.trim() || null,
         github_url: form.github_url.trim() || null,
+        linkedin_url: form.linkedin_url.trim() || null,
         location: form.location.trim() || null,
         focus: form.focus.trim() || null,
         environment: form.environment.trim() || null,
@@ -422,6 +438,7 @@ export default function AdminProfile() {
             <h3 className="form-section-title">Links and metadata</h3>
             <div className="form-grid two-col">
               <Field label="GitHub URL" id="profile-github"><input id="profile-github" type="url" value={form.github_url} onChange={(event) => update("github_url", event.target.value)} placeholder="https://github.com/clyde/example…" /></Field>
+              <Field label="LinkedIn URL" id="profile-linkedin"><input id="profile-linkedin" type="url" value={form.linkedin_url} onChange={(event) => update("linkedin_url", event.target.value)} placeholder="https://www.linkedin.com/in/your-name" /></Field>
               <Field label="Location" id="profile-location"><input id="profile-location" value={form.location} onChange={(event) => update("location", event.target.value)} placeholder="Optional" /></Field>
               <Field label="Focus" id="profile-focus"><input id="profile-focus" value={form.focus} onChange={(event) => update("focus", event.target.value)} placeholder="Technical support" /></Field>
               <Field label="Environment" id="profile-environment"><input id="profile-environment" value={form.environment} onChange={(event) => update("environment", event.target.value)} placeholder="Cloud and infrastructure" /></Field>

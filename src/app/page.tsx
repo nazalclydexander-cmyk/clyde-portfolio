@@ -2,11 +2,11 @@
 import ContactForm from "@/components/ContactForm";
 import CertificationBadgeLightbox from "@/components/CertificationBadgeLightbox";
 import DirectionalPortrait from "@/components/DirectionalPortrait";
-import { ArrowUpRightIcon, GithubIcon } from "@/components/Icons";
+import { ArrowUpRightIcon, GithubIcon, LinkedinIcon } from "@/components/Icons";
 import PublicNavbar from "@/components/PublicNavbar";
 import type { Certification } from "@/lib/certifications";
 import { directionalPortraitSources } from "@/lib/portraitAssets";
-import { formatSupabaseError, isMissingPortraitInteractionColumnError, PORTFOLIO_PROFILE_PUBLIC_SELECT, PORTFOLIO_PROFILE_PUBLIC_SELECT_FALLBACK, PORTFOLIO_PROFILE_TABLE, type PortfolioProfilePublic } from "@/lib/portfolioProfile";
+import { formatSupabaseError, isMissingPortraitInteractionColumnError, PORTFOLIO_PROFILE_PUBLIC_SELECT, PORTFOLIO_PROFILE_PUBLIC_SELECT_FALLBACK, PORTFOLIO_PROFILE_PUBLIC_SELECT_NO_PORTRAIT, PORTFOLIO_PROFILE_TABLE, type PortfolioProfilePublic } from "@/lib/portfolioProfile";
 import { DEFAULT_FOOTER_SETTINGS, FOOTER_SETTINGS_PUBLIC_SELECT, FOOTER_SETTINGS_TABLE, type FooterSettings } from "@/lib/footerSettings";
 import { supabase } from "@/lib/supabase";
 import { connection } from "next/server";
@@ -29,9 +29,13 @@ async function loadPublicProfile() {
   const profileQuery = await supabase.from(PORTFOLIO_PROFILE_TABLE).select(PORTFOLIO_PROFILE_PUBLIC_SELECT).eq("singleton", true).maybeSingle();
   if (!isMissingPortraitInteractionColumnError(profileQuery.error)) return profileQuery;
 
-  const fallbackQuery = await supabase.from(PORTFOLIO_PROFILE_TABLE).select(PORTFOLIO_PROFILE_PUBLIC_SELECT_FALLBACK).eq("singleton", true).maybeSingle();
+  const fallbackWithoutPortraitQuery = await supabase.from(PORTFOLIO_PROFILE_TABLE).select(PORTFOLIO_PROFILE_PUBLIC_SELECT_NO_PORTRAIT).eq("singleton", true).maybeSingle();
+  const fallbackQuery = fallbackWithoutPortraitQuery.error
+    ? await supabase.from(PORTFOLIO_PROFILE_TABLE).select(PORTFOLIO_PROFILE_PUBLIC_SELECT_FALLBACK).eq("singleton", true).maybeSingle()
+    : fallbackWithoutPortraitQuery;
+  const fallbackData = fallbackQuery.data as Record<string, unknown> | null;
   return {
-    data: fallbackQuery.data ? { ...fallbackQuery.data, portrait_interaction_enabled: true } : null,
+    data: fallbackData ? { ...fallbackData, linkedin_url: typeof fallbackData.linkedin_url === "string" ? fallbackData.linkedin_url : null, portrait_interaction_enabled: true } : null,
     error: fallbackQuery.error,
   };
 }
@@ -80,6 +84,7 @@ export default async function Home() {
   const featuredProject = portfolioProjects.find((project) => project.featured) || portfolioProjects[0] || null;
   const additionalProjects = featuredProject ? portfolioProjects.filter((project) => project.id !== featuredProject.id) : [];
   const githubUrl = portfolioProfile?.github_url || portfolioProjects.find((project) => project.github_url)?.github_url || undefined;
+  const linkedinUrl = portfolioProfile?.linkedin_url || undefined;
   const heroName = portfolioProfile?.display_name?.trim() || "Clyde";
   const heroFocus = portfolioProfile?.focus?.trim() || "Cloud Engineer";
   const heroAvailability = portfolioProfile?.availability_text?.trim() || "Open to select opportunities";
@@ -96,7 +101,7 @@ export default async function Home() {
   return (
     <main id="top" className="portfolio-shell">
       <a className="skip-link" href="#hero-title">Skip to main content</a>
-      <PublicNavbar displayName={heroName} focus={heroFocus} githubUrl={githubUrl} />
+      <PublicNavbar displayName={heroName} focus={heroFocus} githubUrl={githubUrl} linkedinUrl={linkedinUrl} />
 
       <section className="hero" aria-labelledby="hero-title">
         <div className="site-container hero-inner">
@@ -108,6 +113,7 @@ export default async function Home() {
               <a className="button" href="#contact">Contact</a>
               <a className="button button-secondary" href="#projects">View projects</a>
               {githubUrl ? <a className="button button-secondary" href={githubUrl} target="_blank" rel="noopener noreferrer"><GithubIcon className="icon-sm" />GitHub</a> : null}
+              {linkedinUrl ? <a className="button button-secondary" href={linkedinUrl} target="_blank" rel="noopener noreferrer"><LinkedinIcon className="icon-sm" />LinkedIn</a> : null}
             </div>
           </div>
 
@@ -223,6 +229,12 @@ export default async function Home() {
                 <a href={githubUrl} target="_blank" rel="noopener noreferrer">
                   <GithubIcon className="icon-sm" />
                   GitHub
+                </a>
+              ) : null}
+              {linkedinUrl ? (
+                <a href={linkedinUrl} target="_blank" rel="noopener noreferrer">
+                  <LinkedinIcon className="icon-sm" />
+                  LinkedIn
                 </a>
               ) : null}
             </div>

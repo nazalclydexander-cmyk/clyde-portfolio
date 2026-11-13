@@ -29,6 +29,7 @@ create table if not exists public.portfolio_profile (
   short_bio text,
   availability_text text,
   github_url text,
+  linkedin_url text,
   profile_image_url text,
   profile_image_path text,
   location text,
@@ -38,6 +39,9 @@ create table if not exists public.portfolio_profile (
   approach text,
   updated_at timestamptz not null default timezone('utc', now())
 );
+
+alter table public.portfolio_profile
+add column if not exists linkedin_url text;
 
 create or replace function public.set_portfolio_profile_updated_at()
 returns trigger

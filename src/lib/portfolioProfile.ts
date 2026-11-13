@@ -9,6 +9,7 @@ const PORTFOLIO_PROFILE_PUBLIC_SELECT_BASE = `
   profile_image_url,
   availability_text,
   github_url,
+  linkedin_url,
   location,
   focus,
   environment,
@@ -17,9 +18,45 @@ const PORTFOLIO_PROFILE_PUBLIC_SELECT_BASE = `
 `;
 
 export const PORTFOLIO_PROFILE_PUBLIC_SELECT = `${PORTFOLIO_PROFILE_PUBLIC_SELECT_BASE}, portrait_interaction_enabled`;
-export const PORTFOLIO_PROFILE_PUBLIC_SELECT_FALLBACK = PORTFOLIO_PROFILE_PUBLIC_SELECT_BASE;
+export const PORTFOLIO_PROFILE_PUBLIC_SELECT_NO_PORTRAIT = PORTFOLIO_PROFILE_PUBLIC_SELECT_BASE;
+export const PORTFOLIO_PROFILE_PUBLIC_SELECT_FALLBACK = `
+  id,
+  singleton,
+  display_name,
+  headline,
+  short_bio,
+  profile_image_url,
+  availability_text,
+  github_url,
+  location,
+  focus,
+  environment,
+  builds,
+  approach
+`;
 
 const PORTFOLIO_PROFILE_ADMIN_SELECT_BASE = `
+  id,
+  singleton,
+  display_name,
+  headline,
+  short_bio,
+  profile_image_url,
+  profile_image_path,
+  availability_text,
+  github_url,
+  linkedin_url,
+  location,
+  focus,
+  environment,
+  builds,
+  approach,
+  updated_at
+`;
+
+export const PORTFOLIO_PROFILE_ADMIN_SELECT = `${PORTFOLIO_PROFILE_ADMIN_SELECT_BASE}, portrait_interaction_enabled`;
+export const PORTFOLIO_PROFILE_ADMIN_SELECT_NO_PORTRAIT = PORTFOLIO_PROFILE_ADMIN_SELECT_BASE;
+export const PORTFOLIO_PROFILE_ADMIN_SELECT_FALLBACK = `
   id,
   singleton,
   display_name,
@@ -37,9 +74,6 @@ const PORTFOLIO_PROFILE_ADMIN_SELECT_BASE = `
   updated_at
 `;
 
-export const PORTFOLIO_PROFILE_ADMIN_SELECT = `${PORTFOLIO_PROFILE_ADMIN_SELECT_BASE}, portrait_interaction_enabled`;
-export const PORTFOLIO_PROFILE_ADMIN_SELECT_FALLBACK = PORTFOLIO_PROFILE_ADMIN_SELECT_BASE;
-
 export type PortfolioProfilePublic = {
   id: string;
   singleton: boolean;
@@ -49,6 +83,7 @@ export type PortfolioProfilePublic = {
   profile_image_url: string | null;
   availability_text: string | null;
   github_url: string | null;
+  linkedin_url: string | null;
   location: string | null;
   focus: string | null;
   environment: string | null;
@@ -80,17 +115,22 @@ export function formatSupabaseError(error: SupabaseLikeError | null | undefined)
   };
 }
 
-export function isMissingPortraitInteractionColumnError(error: SupabaseLikeError | null | undefined) {
+export function isMissingPortfolioProfileOptionalColumnError(error: SupabaseLikeError | null | undefined) {
   const details = formatSupabaseError(error);
   if (!details) return false;
 
   const message = `${details.message} ${details.details || ""}`.toLowerCase();
-  return message.includes("portrait_interaction_enabled") && (
+  const optionalColumn = message.includes("portrait_interaction_enabled") || message.includes("linkedin_url");
+  return optionalColumn && (
     details.code === "42703" ||
     details.code === "PGRST204" ||
     message.includes("does not exist") ||
     message.includes("schema cache")
   );
+}
+
+export function isMissingPortraitInteractionColumnError(error: SupabaseLikeError | null | undefined) {
+  return isMissingPortfolioProfileOptionalColumnError(error);
 }
 
 export function getProfileTableErrorMessage(error: SupabaseLikeError | null | undefined) {

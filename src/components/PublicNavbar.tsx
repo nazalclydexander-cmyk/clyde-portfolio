@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CloseIcon, GithubIcon, MenuIcon } from "@/components/Icons";
+import { CloseIcon, GithubIcon, LinkedinIcon, MenuIcon } from "@/components/Icons";
 
 const links = [
   { href: "#about", label: "About" },
@@ -11,7 +11,7 @@ const links = [
   { href: "#contact", label: "Contact" },
 ];
 
-export default function PublicNavbar({ displayName, focus, githubUrl }: { displayName: string; focus: string; githubUrl?: string }) {
+export default function PublicNavbar({ displayName, focus, githubUrl, linkedinUrl }: { displayName: string; focus: string; githubUrl?: string; linkedinUrl?: string }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -31,6 +31,7 @@ export default function PublicNavbar({ displayName, focus, githubUrl }: { displa
         <div className="nav-actions">
           <div className="nav-action-group desktop-only">
             {githubUrl && <a className="nav-text-action" href={githubUrl} target="_blank" rel="noopener noreferrer"><GithubIcon className="icon-sm" />GitHub</a>}
+            {linkedinUrl && <a className="nav-text-action" href={linkedinUrl} target="_blank" rel="noopener noreferrer"><LinkedinIcon className="icon-sm" />LinkedIn</a>}
             <a className="nav-text-action" href="#contact">Contact</a>
           </div>
           <button className="icon-button menu-button" type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="mobile-navigation" aria-label="Toggle navigation">
@@ -44,6 +45,7 @@ export default function PublicNavbar({ displayName, focus, githubUrl }: { displa
           <div className="site-container">
             {links.map((link) => <a key={link.href} href={link.href} onClick={() => setOpen(false)}>{link.label}</a>)}
             {githubUrl && <a href={githubUrl} target="_blank" rel="noopener noreferrer">GitHub</a>}
+            {linkedinUrl && <a href={linkedinUrl} target="_blank" rel="noopener noreferrer">LinkedIn</a>}
           </div>
         </nav>
       )}
