@@ -344,7 +344,7 @@ function getProjectPreview(project: Project) {
 
 function ProjectMedia({ project, featured = false }: { project: Project; featured?: boolean }) {
   return (
-    <div className={`project-visual${featured ? " project-visual-featured" : ""}`}>
+    <div className={`project-visual${featured ? " project-visual-featured" : ""}${project.image_url ? " project-visual-image" : " project-visual-placeholder"}`}>
       {project.image_url ? (
         <img src={project.image_url} alt={`${project.title} project screenshot`} width={1200} height={750} loading={featured ? "eager" : "lazy"} fetchPriority={featured ? "high" : undefined} />
       ) : (

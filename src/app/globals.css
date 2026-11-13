@@ -429,17 +429,16 @@ img{max-width:100%}
   overflow:hidden;
   background:var(--bg);
   border:1px solid var(--line-soft);
-  aspect-ratio:16/10;
 }
 .project-visual img{
   display:block;
   width:100%;
   max-width:100%;
   height:auto;
-  max-height:100%;
   object-fit:contain;
   object-position:top;
 }
+.project-visual-placeholder{aspect-ratio:16/10}
 .project-visual-featured{
   align-self:start;
   max-height:430px;
