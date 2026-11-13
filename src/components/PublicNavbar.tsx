@@ -11,7 +11,7 @@ const links = [
   { href: "#contact", label: "Contact" },
 ];
 
-export default function PublicNavbar({ displayName, githubUrl }: { displayName: string; githubUrl?: string }) {
+export default function PublicNavbar({ displayName, focus, githubUrl }: { displayName: string; focus: string; githubUrl?: string }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -20,7 +20,7 @@ export default function PublicNavbar({ displayName, githubUrl }: { displayName: 
         <a href="#top" className="brand-mark" aria-label={`${displayName} home`}>
           <span className="brand-wordmark">
             <strong>{displayName}</strong>
-            <small>Cloud Engineer</small>
+            <small>{focus}</small>
           </span>
         </a>
 

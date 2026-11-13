@@ -81,6 +81,7 @@ export default async function Home() {
   const additionalProjects = featuredProject ? portfolioProjects.filter((project) => project.id !== featuredProject.id) : [];
   const githubUrl = portfolioProfile?.github_url || portfolioProjects.find((project) => project.github_url)?.github_url || undefined;
   const heroName = portfolioProfile?.display_name?.trim() || "Clyde";
+  const heroFocus = portfolioProfile?.focus?.trim() || "Cloud Engineer";
   const heroAvailability = portfolioProfile?.availability_text?.trim() || "Open to select opportunities";
   const heroHeadline = portfolioProfile?.headline?.trim() || "Practical cloud, infrastructure, and web systems built for real operations.";
   const heroBio = portfolioProfile?.short_bio?.trim() || "I help teams solve operational problems with reliable systems, practical support, and web tools that are clear enough to maintain.";
@@ -95,7 +96,7 @@ export default async function Home() {
   return (
     <main id="top" className="portfolio-shell">
       <a className="skip-link" href="#hero-title">Skip to main content</a>
-      <PublicNavbar displayName={heroName} githubUrl={githubUrl} />
+      <PublicNavbar displayName={heroName} focus={heroFocus} githubUrl={githubUrl} />
 
       <section className="hero" aria-labelledby="hero-title">
         <div className="site-container hero-inner">
