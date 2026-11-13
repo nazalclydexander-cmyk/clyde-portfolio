@@ -10,6 +10,7 @@ const FOOTER_SETTINGS_SELECT_BASE = `
   show_capabilities_link,
   show_work_link,
   show_contact_link,
+  show_certifications_link,
   show_github_link
 `;
 
@@ -26,6 +27,7 @@ export type FooterSettings = {
   show_capabilities_link: boolean;
   show_work_link: boolean;
   show_contact_link: boolean;
+  show_certifications_link: boolean;
   show_github_link: boolean;
   updated_at?: string | null;
 };
@@ -40,5 +42,6 @@ export const DEFAULT_FOOTER_SETTINGS: FooterSettings = {
   show_capabilities_link: true,
   show_work_link: true,
   show_contact_link: true,
+  show_certifications_link: true,
   show_github_link: true,
 };

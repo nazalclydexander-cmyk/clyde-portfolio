@@ -11,9 +11,13 @@ create table if not exists public.footer_settings (
   show_capabilities_link boolean not null default true,
   show_work_link boolean not null default true,
   show_contact_link boolean not null default true,
+  show_certifications_link boolean not null default true,
   show_github_link boolean not null default true,
   updated_at timestamptz not null default timezone('utc', now())
 );
+
+alter table public.footer_settings
+add column if not exists show_certifications_link boolean not null default true;
 
 create or replace function public.set_footer_settings_updated_at()
 returns trigger

@@ -16,6 +16,7 @@ type FooterForm = {
   show_capabilities_link: boolean;
   show_work_link: boolean;
   show_contact_link: boolean;
+  show_certifications_link: boolean;
   show_github_link: boolean;
 };
 
@@ -27,6 +28,7 @@ const emptyForm: FooterForm = {
   show_capabilities_link: DEFAULT_FOOTER_SETTINGS.show_capabilities_link,
   show_work_link: DEFAULT_FOOTER_SETTINGS.show_work_link,
   show_contact_link: DEFAULT_FOOTER_SETTINGS.show_contact_link,
+  show_certifications_link: DEFAULT_FOOTER_SETTINGS.show_certifications_link,
   show_github_link: DEFAULT_FOOTER_SETTINGS.show_github_link,
 };
 
@@ -66,6 +68,7 @@ export default function AdminFooter() {
         show_capabilities_link: data.show_capabilities_link ?? emptyForm.show_capabilities_link,
         show_work_link: data.show_work_link ?? emptyForm.show_work_link,
         show_contact_link: data.show_contact_link ?? emptyForm.show_contact_link,
+        show_certifications_link: data.show_certifications_link ?? emptyForm.show_certifications_link,
         show_github_link: data.show_github_link ?? emptyForm.show_github_link,
       });
     }
@@ -105,6 +108,7 @@ export default function AdminFooter() {
         show_capabilities_link: form.show_capabilities_link,
         show_work_link: form.show_work_link,
         show_contact_link: form.show_contact_link,
+        show_certifications_link: form.show_certifications_link,
         show_github_link: form.show_github_link,
         updated_at: new Date().toISOString(),
       }, { onConflict: "singleton" });
@@ -162,6 +166,7 @@ export default function AdminFooter() {
               <label className="checkbox-field"><input type="checkbox" checked={form.show_capabilities_link} onChange={(event) => update("show_capabilities_link", event.target.checked)} /><span><strong>Capabilities</strong><small className="field-hint">Link to the capabilities section.</small></span></label>
               <label className="checkbox-field"><input type="checkbox" checked={form.show_work_link} onChange={(event) => update("show_work_link", event.target.checked)} /><span><strong>Work</strong><small className="field-hint">Link to the projects section.</small></span></label>
               <label className="checkbox-field"><input type="checkbox" checked={form.show_contact_link} onChange={(event) => update("show_contact_link", event.target.checked)} /><span><strong>Contact</strong><small className="field-hint">Link to the contact section.</small></span></label>
+              <label className="checkbox-field"><input type="checkbox" checked={form.show_certifications_link} onChange={(event) => update("show_certifications_link", event.target.checked)} /><span><strong>Certifications</strong><small className="field-hint">Shown when at least one certification is available.</small></span></label>
               <label className="checkbox-field"><input type="checkbox" checked={form.show_github_link} onChange={(event) => update("show_github_link", event.target.checked)} /><span><strong>GitHub</strong><small className="field-hint">Shown only when a GitHub URL exists in the profile.</small></span></label>
             </div>
           </section>
