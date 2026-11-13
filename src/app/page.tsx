@@ -7,6 +7,7 @@ import PublicNavbar from "@/components/PublicNavbar";
 import type { Certification } from "@/lib/certifications";
 import { directionalPortraitSources } from "@/lib/portraitAssets";
 import { formatSupabaseError, isMissingPortraitInteractionColumnError, PORTFOLIO_PROFILE_PUBLIC_SELECT, PORTFOLIO_PROFILE_PUBLIC_SELECT_FALLBACK, PORTFOLIO_PROFILE_TABLE, type PortfolioProfilePublic } from "@/lib/portfolioProfile";
+import { DEFAULT_FOOTER_SETTINGS, FOOTER_SETTINGS_PUBLIC_SELECT, FOOTER_SETTINGS_TABLE, type FooterSettings } from "@/lib/footerSettings";
 import { supabase } from "@/lib/supabase";
 import { connection } from "next/server";
 
@@ -38,11 +39,12 @@ async function loadPublicProfile() {
 export default async function Home() {
   await connection();
 
-  const [{ data: projects, error: projectsError }, { data: skills, error: skillsError }, { data: profile, error: profileError }, { data: certificationRows, error: certificationsError }] = await Promise.all([
+  const [{ data: projects, error: projectsError }, { data: skills, error: skillsError }, { data: profile, error: profileError }, { data: certificationRows, error: certificationsError }, { data: footerSettingsRow, error: footerSettingsError }] = await Promise.all([
     supabase.from("projects").select("*").eq("status", "published").order("sort_order", { ascending: true }),
     supabase.from("skills").select("*").order("sort_order", { ascending: true }),
     loadPublicProfile(),
     supabase.from("certifications").select("*").order("sort_order", { ascending: true }),
+    supabase.from(FOOTER_SETTINGS_TABLE).select(FOOTER_SETTINGS_PUBLIC_SELECT).eq("singleton", true).maybeSingle(),
   ]);
 
   if (projectsError) console.error("Projects error:", projectsError);
@@ -58,10 +60,12 @@ export default async function Home() {
     console.error("name:", profileError.name ?? null);
   }
   if (certificationsError) console.error("Certifications error:", certificationsError);
+  if (footerSettingsError) console.error("Footer settings error:", footerSettingsError);
 
   const portfolioProjects = (projects || []) as Project[];
   const portfolioSkills = (skills || []) as Skill[];
   const portfolioProfile = (profile || null) as PortfolioProfilePublic | null;
+  const footerSettings = (footerSettingsRow || DEFAULT_FOOTER_SETTINGS) as FooterSettings;
   const certifications = (certificationRows || []).map((row) => ({
     id: row.id,
     name: row.name,
@@ -201,26 +205,28 @@ export default async function Home() {
         </div>
       </section>
 
-      <footer className="footer">
-        <div className="site-container footer-inner">
-          <div>
-            <div className="footer-title">Practical cloud, support, and web systems for real operations.</div>
-            <p className="footer-subtitle">{buildFooterSubtitle(portfolioProfile)}</p>
+      {footerSettings.enabled ? (
+        <footer className="footer">
+          <div className="site-container footer-inner">
+            <div>
+              <div className="footer-title">{footerSettings.title?.trim() || DEFAULT_FOOTER_SETTINGS.title}</div>
+              <p className="footer-subtitle">{footerSettings.subtitle?.trim() || buildFooterSubtitle(portfolioProfile)}</p>
+            </div>
+            <div className="footer-links">
+              {footerSettings.show_about_link ? <a href="#about">About</a> : null}
+              {footerSettings.show_capabilities_link ? <a href="#skills">Capabilities</a> : null}
+              {footerSettings.show_work_link ? <a href="#projects">Work</a> : null}
+              {footerSettings.show_contact_link ? <a href="#contact">Contact</a> : null}
+              {footerSettings.show_github_link && githubUrl ? (
+                <a href={githubUrl} target="_blank" rel="noopener noreferrer">
+                  <GithubIcon className="icon-sm" />
+                  GitHub
+                </a>
+              ) : null}
+            </div>
           </div>
-          <div className="footer-links">
-            <a href="#about">About</a>
-            <a href="#skills">Capabilities</a>
-            <a href="#projects">Work</a>
-            <a href="#contact">Contact</a>
-            {githubUrl ? (
-              <a href={githubUrl} target="_blank" rel="noopener noreferrer">
-                <GithubIcon className="icon-sm" />
-                GitHub
-              </a>
-            ) : null}
-          </div>
-        </div>
-      </footer>
+        </footer>
+      ) : null}
     </main>
   );
 }

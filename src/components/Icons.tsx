@@ -87,6 +87,10 @@ export function BadgeIcon(props: IconProps) {
   return <Icon {...props}><circle cx="12" cy="9" r="5.5" /><path d="m8.5 13.5-1 7 4.5-2.5 4.5 2.5-1-7M9.5 9h5M12 6.5v5" /></Icon>;
 }
 
+export function FooterIcon(props: IconProps) {
+  return <Icon {...props}><rect x="3.5" y="4" width="17" height="12" rx="2" /><path d="M7 20h10M12 16v4M7 8h10M7 12h6" /></Icon>;
+}
+
 export function ProfileIcon(props: IconProps) {
   return <Icon {...props}><rect x="4" y="3.5" width="16" height="17" rx="2" /><circle cx="12" cy="9" r="2.5" /><path d="M7.5 17c1.5-2 3-3 4.5-3s3 .9 4.5 3" /></Icon>;
 }
