@@ -215,9 +215,9 @@ export default async function Home() {
             <div className="footer-links">
               {footerSettings.show_about_link ? <a href="#about">About</a> : null}
               {footerSettings.show_capabilities_link ? <a href="#skills">Capabilities</a> : null}
+              {footerSettings.show_certifications_link && certifications.length > 0 ? <a href="#certifications">Certifications</a> : null}
               {footerSettings.show_work_link ? <a href="#projects">Work</a> : null}
               {footerSettings.show_contact_link ? <a href="#contact">Contact</a> : null}
-              {footerSettings.show_certifications_link && certifications.length > 0 ? <a href="#certifications">Certifications</a> : null}
               {footerSettings.show_github_link && githubUrl ? (
                 <a href={githubUrl} target="_blank" rel="noopener noreferrer">
                   <GithubIcon className="icon-sm" />
